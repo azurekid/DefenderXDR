@@ -178,7 +178,7 @@ $indicator = Get-DefenderXDRIndicator -IndicatorId "12345"
 $highSeverity = Get-DefenderXDRIndicator -Filter "severity eq 'High'" -OrderBy "creationTime desc"
 
 # Create a single indicator
-New-DefenderXDRIndicator -IndicatorValue "malicious.com" `
+Submit-DefenderXDRIndicator -IndicatorValue "malicious.com" `
                          -IndicatorType "DomainName" `
                          -Action "AlertAndBlock" `
                          -Title "Malicious Domain" `
@@ -431,7 +431,7 @@ $VerbosePreference = 'SilentlyContinue'
 
 ### Threat Intelligence (Defender Endpoint API)
 - `Get-DefenderXDRIndicator` - Get threat indicators via Defender Endpoint API
-- `New-DefenderXDRIndicator` - Create a single threat indicator
+- `Submit-DefenderXDRIndicator` - Submit a single threat indicator
 - `Import-DefenderXDRIndicators` - Bulk import threat indicators
 - `Remove-DefenderXDRIndicator` - Remove a single threat indicator
 - `Remove-DefenderXDRIndicatorBatch` - Batch remove multiple threat indicators

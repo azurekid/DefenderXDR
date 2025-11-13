@@ -1,46 +1,48 @@
-function New-DefenderXDRIndicator {
+function Submit-DefenderXDRIndicator {
     <#
     .SYNOPSIS
-        Create a new threat indicator in Microsoft Defender Endpoint
+        Submit a new threat indicator to Microsoft Defender Endpoint
     .DESCRIPTION
         Submits a new threat intelligence indicator to Microsoft Defender Endpoint API
         Based on: https://learn.microsoft.com/en-us/defender-endpoint/api/post-ti-indicator
         Supports pipeline input from Get-DefenderXDRIndicator for updating or recreating indicators.
     .PARAMETER IndicatorValue
-        The value of the indicator (e.g., domain, IP address, URL, or file hash)
+        Identity of the Indicator entity. Required
     .PARAMETER IndicatorType
-        Type of the indicator. Valid values: FileSha1, FileSha256, IpAddress, DomainName, Url
+        Type of the indicator. Possible values are: FileSha1, FileMd5, CertificateThumbprint, FileSha256, IpAddress, DomainName, and Url. Required
     .PARAMETER Action
-        The action to take when the indicator is detected. Valid values: Alert, AlertAndBlock, Allowed
+        The action that is taken if the indicator is discovered in the organization. Possible values are: Alert, Warn, Block, Audit, BlockAndRemediate, AlertAndBlock, and Allowed. Required. The GenerateAlert parameter must be set to TRUE when creating an action with Audit.
+    .PARAMETER Application
+        A user-friendly name for the content blocked by the indicator. If specified, this text will be shown in the blocking notification in place of the blocked filename or domain. This field only works for new indicators; it doesn't update the value on an existing indicator. Optional
     .PARAMETER Title
-        Title for the indicator
+        Indicator alert title. Required
     .PARAMETER Description
-        Description of the indicator
+        Description of the indicator. Required
+    .PARAMETER ExpirationTime
+        The expiration time of the indicator. Optional
     .PARAMETER Severity
-        Severity of the indicator. Valid values: Informational, Low, Medium, High
+        The severity of the indicator. Possible values are: Informational, Low, Medium, and High. Optional
     .PARAMETER RecommendedActions
-        Recommended actions for the indicator
+        TI indicator alert recommended actions. Optional
     .PARAMETER RbacGroupNames
-        List of RBAC group names the indicator would be applied to
+        Comma-separated list of RBAC group names the indicator would be applied to. Optional
+    .PARAMETER EducateUrl
+        Custom notification/support URL. Supported for Block and Warn action types for URL indicators. Optional
+    .PARAMETER GenerateAlert
+        True if alert generation is required, False if this indicator shouldn't generate an alert.
     .PARAMETER RbacGroupIds
         List of RBAC group IDs the indicator would be applied to
     .PARAMETER Category
         Category of the indicator
-    .PARAMETER ExpirationTime
-        Expiration time of the indicator in ISO 8601 format
-    .PARAMETER GenerateAlert
-        Whether to generate an alert when the indicator is detected
-    .PARAMETER Application
-        Application associated with the indicator
     .PARAMETER MitreTechniques
         Array of MITRE ATT&CK techniques associated with the indicator
     .PARAMETER LookBackPeriod
         The period during which matches on the indicator are detected. Format: ISO 8601 duration (e.g., "P30D" for 30 days)
     .EXAMPLE
-        New-DefenderXDRIndicator -IndicatorValue "malicious.com" -IndicatorType "DomainName" -Action "AlertAndBlock" -Title "Malicious Domain" -Severity "High"
+        Submit-DefenderXDRIndicator -IndicatorValue "malicious.com" -IndicatorType "DomainName" -Action "AlertAndBlock" -Title "Malicious Domain" -Description "Known phishing domain" -Severity "High"
         Creates a new domain indicator that blocks and alerts
     .EXAMPLE
-        New-DefenderXDRIndicator -IndicatorValue "192.0.2.1" -IndicatorType "IpAddress" -Action "Alert" -Title "Suspicious IP" -Severity "Medium" -Description "Known C2 server"
+        Submit-DefenderXDRIndicator -IndicatorValue "192.0.2.1" -IndicatorType "IpAddress" -Action "Alert" -Title "Suspicious IP" -Description "Known C2 server" -Severity "Medium"
         Creates a new IP address indicator
     .EXAMPLE
         $params = @{
@@ -53,10 +55,10 @@ function New-DefenderXDRIndicator {
             ExpirationTime = (Get-Date).AddDays(90).ToString('o')
             MitreTechniques = @("T1566", "T1204")
         }
-        New-DefenderXDRIndicator @params
+        Submit-DefenderXDRIndicator @params
         Creates a new file hash indicator with expiration and MITRE techniques
     .EXAMPLE
-        Get-DefenderXDRIndicator -IndicatorId "123" | New-DefenderXDRIndicator
+        Get-DefenderXDRIndicator -IndicatorId "123" | Submit-DefenderXDRIndicator
         Recreates an indicator from an existing one using pipeline input
     #>
     [CmdletBinding(SupportsShouldProcess)]
@@ -65,18 +67,24 @@ function New-DefenderXDRIndicator {
         [string]$IndicatorValue,
 
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
-        [ValidateSet('FileSha1', 'FileSha256', 'IpAddress', 'DomainName', 'Url')]
+        [ValidateSet('FileSha1', 'FileMd5', 'CertificateThumbprint', 'FileSha256', 'IpAddress', 'DomainName', 'Url')]
         [string]$IndicatorType,
 
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
-        [ValidateSet('Alert', 'AlertAndBlock', 'Allowed')]
+        [ValidateSet('Alert', 'Warn', 'Block', 'Audit', 'BlockAndRemediate', 'AlertAndBlock', 'Allowed')]
         [string]$Action,
+
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
+        [string]$Application,
 
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [string]$Title,
 
-        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [string]$Description,
+
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
+        [string]$ExpirationTime,
 
         [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
         [ValidateSet('Informational', 'Low', 'Medium', 'High')]
@@ -89,19 +97,16 @@ function New-DefenderXDRIndicator {
         [string[]]$RbacGroupNames,
 
         [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
-        [int[]]$RbacGroupIds,
-
-        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
-        [string]$Category,
-
-        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
-        [string]$ExpirationTime,
+        [string]$EducateUrl,
 
         [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
         [bool]$GenerateAlert,
 
         [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
-        [string]$Application,
+        [int[]]$RbacGroupIds,
+
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
+        [string]$Category,
 
         [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
         [string[]]$MitreTechniques,
@@ -124,10 +129,10 @@ function New-DefenderXDRIndicator {
                 indicatorType = $IndicatorType
                 action = $Action
                 title = $Title
+                description = $Description
             }
 
             # Add optional parameters if provided
-            if ($Description) { $indicator['description'] = $Description }
             if ($Severity) { $indicator['severity'] = $Severity }
             if ($RecommendedActions) { $indicator['recommendedActions'] = $RecommendedActions }
             if ($RbacGroupNames) { $indicator['rbacGroupNames'] = $RbacGroupNames }
@@ -136,6 +141,7 @@ function New-DefenderXDRIndicator {
             if ($ExpirationTime) { $indicator['expirationTime'] = $ExpirationTime }
             if ($PSBoundParameters.ContainsKey('GenerateAlert')) { $indicator['generateAlert'] = $GenerateAlert }
             if ($Application) { $indicator['application'] = $Application }
+            if ($EducateUrl) { $indicator['educateUrl'] = $EducateUrl }
             if ($MitreTechniques) { $indicator['mitreTechniques'] = $MitreTechniques }
             if ($LookBackPeriod) { $indicator['lookBackPeriod'] = $LookBackPeriod }
 
