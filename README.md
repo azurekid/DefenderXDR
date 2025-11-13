@@ -130,7 +130,7 @@ New-DefenderXDRIncidentComment -IncidentId "123" -Comment "Escalating to Tier 2"
 $indicators = Get-DefenderXDRThreatIntelligence -Top 100
 
 # Submit a malicious domain indicator
-Submit-DefenderXDRThreatIndicator -IndicatorValue "malicious.com" `
+Set-DefenderXDRThreatIndicator -IndicatorValue "malicious.com" `
                                     -IndicatorType "domainName" `
                                     -Action "block" `
                                     -ThreatType "Malware" `
@@ -138,10 +138,15 @@ Submit-DefenderXDRThreatIndicator -IndicatorValue "malicious.com" `
                                     -Severity 5
 
 # Submit a file hash indicator
-Submit-DefenderXDRThreatIndicator -IndicatorValue "abc123..." `
+Set-DefenderXDRThreatIndicator -IndicatorValue "abc123..." `
                                     -IndicatorType "fileSha256" `
                                     -Action "alert" `
                                     -ThreatType "Malware"
+
+# Update an existing indicator
+Set-DefenderXDRThreatIndicator -IndicatorId "ti123..." `
+                                    -Action "allowed" `
+                                    -Description "False positive - now allowed"
 
 # Remove an indicator
 Remove-DefenderXDRThreatIndicator -IndicatorId "ti123..."
@@ -286,7 +291,7 @@ foreach ($incident in $activeIncidents) {
 $iocs = Import-Csv "iocs.csv"
 
 foreach ($ioc in $iocs) {
-    Submit-DefenderXDRThreatIndicator -IndicatorValue $ioc.Value `
+    Set-DefenderXDRThreatIndicator -IndicatorValue $ioc.Value `
                                        -IndicatorType $ioc.Type `
                                        -Action "block" `
                                        -ThreatType $ioc.ThreatType `
@@ -324,7 +329,7 @@ This ensures that tokens with broader permissions can be used for operations req
 
 #### Threat Intelligence Functions (Graph API)
 - **Get-DefenderXDRThreatIntelligence**: `ThreatIndicators.Read.All` or `ThreatIndicators.ReadWrite.OwnedBy`
-- **Submit-DefenderXDRThreatIndicator**: `ThreatIndicators.ReadWrite.OwnedBy`
+- **Set-DefenderXDRThreatIndicator**: `ThreatIndicators.ReadWrite.OwnedBy`
 - **Remove-DefenderXDRThreatIndicator**: `ThreatIndicators.ReadWrite.OwnedBy`
 
 #### Security Posture Functions
@@ -421,7 +426,7 @@ $VerbosePreference = 'SilentlyContinue'
 
 ### Threat Intelligence (Graph API)
 - `Get-DefenderXDRThreatIntelligence` - Get threat indicators via Graph API
-- `Submit-DefenderXDRThreatIndicator` - Submit a threat indicator via Graph API
+- `Set-DefenderXDRThreatIndicator` - Submit or update a threat indicator via Graph API
 - `Remove-DefenderXDRThreatIndicator` - Remove a threat indicator via Graph API
 
 ### Threat Intelligence (Defender Endpoint API)

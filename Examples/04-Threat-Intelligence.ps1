@@ -10,7 +10,7 @@ Connect-DefenderXDR -AccessToken $accessToken
 
 # Example 1: Submit a malicious domain indicator
 Write-Host "Example 1: Submitting malicious domain indicator..."
-$domain = Submit-DefenderXDRThreatIndicator `
+$domain = Set-DefenderXDRThreatIndicator `
     -IndicatorValue "malicious-domain.com" `
     -IndicatorType "domainName" `
     -Action "block" `
@@ -24,7 +24,7 @@ Write-Host "Domain indicator submitted: $($domain.id)"
 
 # Example 2: Submit a file hash indicator
 Write-Host "`nExample 2: Submitting file hash indicator..."
-$fileHash = Submit-DefenderXDRThreatIndicator `
+$fileHash = Set-DefenderXDRThreatIndicator `
     -IndicatorValue "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" `
     -IndicatorType "fileSha256" `
     -Action "alert" `
@@ -37,7 +37,7 @@ Write-Host "File hash indicator submitted: $($fileHash.id)"
 
 # Example 3: Submit an IP address indicator
 Write-Host "`nExample 3: Submitting IP address indicator..."
-$ip = Submit-DefenderXDRThreatIndicator `
+$ip = Set-DefenderXDRThreatIndicator `
     -IndicatorValue "192.0.2.100" `
     -IndicatorType "ipAddress" `
     -Action "block" `
@@ -80,7 +80,7 @@ $iocs = @(
 foreach ($ioc in $iocs) {
     Write-Host "  Submitting: $($ioc.IndicatorValue)..."
     
-    Submit-DefenderXDRThreatIndicator `
+    Set-DefenderXDRThreatIndicator `
         -IndicatorValue $ioc.IndicatorValue `
         -IndicatorType $ioc.IndicatorType `
         -Action $ioc.Action `
@@ -91,8 +91,18 @@ foreach ($ioc in $iocs) {
 
 Write-Host "Bulk import complete!"
 
-# Example 5: List current threat indicators
-Write-Host "`nExample 5: Listing current threat indicators..."
+# Example 5: Update an existing indicator
+Write-Host "`nExample 5: Updating an existing threat indicator..."
+# Note: You would get the indicator ID from a previous operation or query
+# $existingIndicatorId = $domain.id
+# Set-DefenderXDRThreatIndicator `
+#     -IndicatorId $existingIndicatorId `
+#     -Action "allowed" `
+#     -Description "Updated to allowed after investigation - false positive" `
+#     -Severity 1
+
+# Example 6: List current threat indicators
+Write-Host "`nExample 6: Listing current threat indicators..."
 $indicators = Get-DefenderXDRThreatIntelligence -Top 10
 Write-Host "Current indicators: $($indicators.Count)"
 
@@ -103,7 +113,7 @@ foreach ($indicator in $indicators) {
     Write-Host "  Value: $($indicator.domainName)$($indicator.url)$($indicator.networkIPv4)$($indicator.fileHashValue)"
 }
 
-# Example 6: Remove an indicator (uncomment to use)
+# Example 7: Remove an indicator (uncomment to use)
 <#
 Write-Host "`nExample 6: Removing an indicator..."
 $indicatorToRemove = "indicator-id-here"

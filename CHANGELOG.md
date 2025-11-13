@@ -5,6 +5,15 @@ All notable changes to the DefenderXDR PowerShell module will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- Renamed `Submit-DefenderXDRThreatIndicator` to `Set-DefenderXDRThreatIndicator` to better reflect its dual capability
+- `Set-DefenderXDRThreatIndicator` now supports both creating new and updating existing threat indicators
+  - Use without `-IndicatorId` to create a new indicator (requires `-IndicatorValue`, `-IndicatorType`, and `-Action`)
+  - Use with `-IndicatorId` to update an existing indicator (all other parameters are optional)
+- Added backward compatibility alias `Submit-DefenderXDRThreatIndicator` for existing scripts
+
 ## [1.0.0] - 2025-11-13
 
 ### Added
@@ -26,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   
 - Threat Intelligence:
   - `Get-DefenderXDRThreatIntelligence` - Get threat indicators
-  - `Submit-DefenderXDRThreatIndicator` - Submit new threat indicators
+  - `Set-DefenderXDRThreatIndicator` - Submit new or update existing threat indicators
   - `Remove-DefenderXDRThreatIndicator` - Remove threat indicators
   
 - Security Posture:
