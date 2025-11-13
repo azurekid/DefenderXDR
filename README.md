@@ -295,6 +295,12 @@ To use this module, you need to register an Azure AD application and grant it th
 
 **New in this release:** All functions now validate that your access token contains the required permissions before making API calls. If your token lacks the necessary permissions, you'll receive a clear error message indicating which permissions are required.
 
+**Permission Matching:** The validation supports flexible permission matching. A token with a more permissive version of a permission (ending in `.All`) will satisfy requirements for the base permission. For example:
+- A token with `Ti.ReadWrite.All` satisfies requirements for `Ti.ReadWrite`
+- A token with `SecurityEvents.ReadWrite.All` satisfies requirements for `SecurityEvents.Read.All`
+
+This ensures that tokens with broader permissions can be used for operations requiring more specific permissions.
+
 ### Microsoft Graph API Permissions
 
 #### Security Alerts Functions

@@ -63,6 +63,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated module to export 19 functions (increased from 15)
 - All public functions now validate permissions before making API calls
 - Enhanced error messages to indicate required vs. actual permissions in token
+- **Fixed permission validation**: Permission matching now supports "permissive matching" where tokens with broader permissions (e.g., `Ti.ReadWrite.All`) can satisfy requirements for more specific permissions (e.g., `Ti.ReadWrite`)
+- Improved error messages with better formatting and clearer guidance using `Write-Error` instead of `throw`
 
 ### Security
 - **Improved security**: Access tokens are now validated for required permissions before API calls
