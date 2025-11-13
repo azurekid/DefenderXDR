@@ -36,7 +36,10 @@ Write-Host "`nExample 3: Creating a single threat indicator..." -ForegroundColor
 #                                          -Title "Test Domain Indicator" `
 #                                          -Severity "High" `
 #                                          -Description "Example domain for testing purposes" `
-#                                          -ExpirationTime (Get-Date).AddDays(7).ToString('o')
+#                                          -ExpirationTime (Get-Date).AddDays(7).ToString('o') `
+#                                          -MitreTechniques @("T1566", "T1204") `
+#                                          -Application "EmailClient" `
+#                                          -LookBackPeriod "P30D"
 # Write-Host "Created indicator with ID: $($newIndicator.id)"
 
 # Example 4: Import multiple indicators in bulk
@@ -131,14 +134,22 @@ else {
     Write-Host "No expired indicators found"
 }
 
-# Example 9: Pipeline usage
-Write-Host "`nExample 9: Using pipeline for removal..." -ForegroundColor Yellow
+# Example 9: Pipeline usage with New-DefenderXDRIndicator
+Write-Host "`nExample 9: Using pipeline to recreate/update indicators..." -ForegroundColor Yellow
+# You can pipe indicators from Get-DefenderXDRIndicator to New-DefenderXDRIndicator
+# This is useful for copying indicators or recreating them with modifications
+# Uncomment to actually use:
+# $indicator = Get-DefenderXDRIndicator -IndicatorId "123"
+# $indicator | New-DefenderXDRIndicator
+
+# Example 10: Pipeline usage for removal
+Write-Host "`nExample 10: Using pipeline for removal..." -ForegroundColor Yellow
 # Uncomment to actually remove:
 # Get-DefenderXDRIndicator -Filter "severity eq 'Informational'" | 
 #     Where-Object { $_.expirationTime -lt (Get-Date) } |
 #     Remove-DefenderXDRIndicator -Confirm:$false
 
-Write-Host "`nNote: Most removal operations are commented out to prevent accidental deletions"
+Write-Host "`nNote: Most creation and removal operations are commented out to prevent accidental changes"
 
 Write-Host "`n═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
 Write-Host "Examples completed!" -ForegroundColor Green
