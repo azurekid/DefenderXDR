@@ -5,6 +5,7 @@ function New-DefenderXDRIndicator {
     .DESCRIPTION
         Submits a new threat intelligence indicator to Microsoft Defender Endpoint API
         Based on: https://learn.microsoft.com/en-us/defender-endpoint/api/post-ti-indicator
+        Supports pipeline input from Get-DefenderXDRIndicator for updating or recreating indicators.
     .PARAMETER IndicatorValue
         The value of the indicator (e.g., domain, IP address, URL, or file hash)
     .PARAMETER IndicatorType
@@ -21,12 +22,20 @@ function New-DefenderXDRIndicator {
         Recommended actions for the indicator
     .PARAMETER RbacGroupNames
         List of RBAC group names the indicator would be applied to
+    .PARAMETER RbacGroupIds
+        List of RBAC group IDs the indicator would be applied to
     .PARAMETER Category
         Category of the indicator
     .PARAMETER ExpirationTime
         Expiration time of the indicator in ISO 8601 format
     .PARAMETER GenerateAlert
         Whether to generate an alert when the indicator is detected
+    .PARAMETER Application
+        Application associated with the indicator
+    .PARAMETER MitreTechniques
+        Array of MITRE ATT&CK techniques associated with the indicator
+    .PARAMETER LookBackPeriod
+        The period during which matches on the indicator are detected. Format: ISO 8601 duration (e.g., "P30D" for 30 days)
     .EXAMPLE
         New-DefenderXDRIndicator -IndicatorValue "malicious.com" -IndicatorType "DomainName" -Action "AlertAndBlock" -Title "Malicious Domain" -Severity "High"
         Creates a new domain indicator that blocks and alerts
@@ -42,82 +51,104 @@ function New-DefenderXDRIndicator {
             Severity = "High"
             Description = "Known malware sample"
             ExpirationTime = (Get-Date).AddDays(90).ToString('o')
+            MitreTechniques = @("T1566", "T1204")
         }
         New-DefenderXDRIndicator @params
-        Creates a new file hash indicator with expiration
+        Creates a new file hash indicator with expiration and MITRE techniques
+    .EXAMPLE
+        Get-DefenderXDRIndicator -IndicatorId "123" | New-DefenderXDRIndicator
+        Recreates an indicator from an existing one using pipeline input
     #>
     [CmdletBinding(SupportsShouldProcess)]
     param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [string]$IndicatorValue,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [ValidateSet('FileSha1', 'FileSha256', 'IpAddress', 'DomainName', 'Url')]
         [string]$IndicatorType,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [ValidateSet('Alert', 'AlertAndBlock', 'Allowed')]
         [string]$Action,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [string]$Title,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
         [string]$Description,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
         [ValidateSet('Informational', 'Low', 'Medium', 'High')]
         [string]$Severity,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
         [string]$RecommendedActions,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
         [string[]]$RbacGroupNames,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
+        [int[]]$RbacGroupIds,
+
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
         [string]$Category,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
         [string]$ExpirationTime,
 
-        [Parameter(Mandatory = $false)]
-        [bool]$GenerateAlert
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
+        [bool]$GenerateAlert,
+
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
+        [string]$Application,
+
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
+        [string[]]$MitreTechniques,
+
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
+        [string]$LookBackPeriod
     )
 
-    try {
-        # Validate permissions
-        Test-DefenderXDRPermission -RequiredPermissions @('Ti.ReadWrite') -FunctionName $MyInvocation.MyCommand.Name
+    process {
+        try {
+            # Validate permissions
+            Test-DefenderXDRPermission -RequiredPermissions @('Ti.ReadWrite') -FunctionName $MyInvocation.MyCommand.Name
 
-        $baseUri = "https://api.securitycenter.microsoft.com/api"
-        $uri = "$baseUri/indicators"
+            $baseUri = "https://api.securitycenter.microsoft.com/api"
+            $uri = "$baseUri/indicators"
 
-        # Build the indicator object
-        $indicator = @{
-            indicatorValue = $IndicatorValue
-            indicatorType = $IndicatorType
-            action = $Action
-            title = $Title
+            # Build the indicator object
+            $indicator = @{
+                indicatorValue = $IndicatorValue
+                indicatorType = $IndicatorType
+                action = $Action
+                title = $Title
+            }
+
+            # Add optional parameters if provided
+            if ($Description) { $indicator['description'] = $Description }
+            if ($Severity) { $indicator['severity'] = $Severity }
+            if ($RecommendedActions) { $indicator['recommendedActions'] = $RecommendedActions }
+            if ($RbacGroupNames) { $indicator['rbacGroupNames'] = $RbacGroupNames }
+            if ($RbacGroupIds) { $indicator['rbacGroupIds'] = $RbacGroupIds }
+            if ($Category) { $indicator['category'] = $Category }
+            if ($ExpirationTime) { $indicator['expirationTime'] = $ExpirationTime }
+            if ($PSBoundParameters.ContainsKey('GenerateAlert')) { $indicator['generateAlert'] = $GenerateAlert }
+            if ($Application) { $indicator['application'] = $Application }
+            if ($MitreTechniques) { $indicator['mitreTechniques'] = $MitreTechniques }
+            if ($LookBackPeriod) { $indicator['lookBackPeriod'] = $LookBackPeriod }
+
+            if ($PSCmdlet.ShouldProcess($IndicatorValue, "Create threat indicator in Defender Endpoint")) {
+                Write-Verbose "Creating indicator: $IndicatorValue ($IndicatorType)"
+                $response = Invoke-DefenderXDRRequest -Uri $uri -Method POST -Body $indicator
+                Write-Verbose "Indicator created successfully with ID: $($response.id)"
+                return $response
+            }
         }
-
-        # Add optional parameters if provided
-        if ($Description) { $indicator['description'] = $Description }
-        if ($Severity) { $indicator['severity'] = $Severity }
-        if ($RecommendedActions) { $indicator['recommendedActions'] = $RecommendedActions }
-        if ($RbacGroupNames) { $indicator['rbacGroupNames'] = $RbacGroupNames }
-        if ($Category) { $indicator['category'] = $Category }
-        if ($ExpirationTime) { $indicator['expirationTime'] = $ExpirationTime }
-        if ($PSBoundParameters.ContainsKey('GenerateAlert')) { $indicator['generateAlert'] = $GenerateAlert }
-
-        if ($PSCmdlet.ShouldProcess($IndicatorValue, "Create threat indicator in Defender Endpoint")) {
-            Write-Verbose "Creating indicator: $IndicatorValue ($IndicatorType)"
-            $response = Invoke-DefenderXDRRequest -Uri $uri -Method POST -Body $indicator
-            Write-Verbose "Indicator created successfully with ID: $($response.id)"
-            return $response
+        catch {
+            Write-Error "Failed to create threat indicator: $_"
+            throw
         }
-    }
-    catch {
-        Write-Error "Failed to create threat indicator: $_"
-        throw
     }
 }
