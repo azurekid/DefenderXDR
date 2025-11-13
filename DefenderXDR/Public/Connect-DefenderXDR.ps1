@@ -13,16 +13,15 @@ function Connect-DefenderXDR {
         Azure AD Application (Client) ID
     .PARAMETER ClientSecret
         Azure AD Application Client Secret
-    .PARAMETER Certificate
-        Certificate for certificate-based authentication
     .PARAMETER Scopes
-        Required permission scopes
+        Required permission scopes (for documentation purposes - used in future authentication methods)
     .EXAMPLE
         Connect-DefenderXDR -AccessToken "eyJ0eXAiOi..."
     .EXAMPLE
         Connect-DefenderXDR -TenantId "contoso.onmicrosoft.com" -ClientId "12345..." -ClientSecret "secret"
     #>
     [CmdletBinding(DefaultParameterSetName = 'AccessToken')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Scopes', Justification = 'Parameter reserved for future interactive authentication implementation')]
     param (
         [Parameter(Mandatory = $true, ParameterSetName = 'AccessToken')]
         [string]$AccessToken,
@@ -117,7 +116,7 @@ function Connect-DefenderXDR {
         
         try {
             $null = Invoke-RestMethod -Uri $testUri -Headers $headers -Method Get
-            Write-Host "Successfully connected to Microsoft Defender XDR" -ForegroundColor Green
+            Write-Information "Successfully connected to Microsoft Defender XDR" -InformationAction Continue
             return $true
         }
         catch {

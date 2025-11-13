@@ -22,7 +22,7 @@ function Remove-DefenderXDRThreatIndicator {
             if ($PSCmdlet.ShouldProcess($IndicatorId, "Remove threat indicator")) {
                 $null = Invoke-DefenderXDRRequest -Uri $uri -Method DELETE
                 Write-Verbose "Threat indicator removed successfully"
-                Write-Host "Threat indicator $IndicatorId removed successfully" -ForegroundColor Green
+                Write-Information "Threat indicator $IndicatorId removed successfully" -InformationAction Continue
             }
         }
         catch {

@@ -15,5 +15,5 @@ function Disconnect-DefenderXDR {
     $script:TenantId = $null
 
     Write-Verbose "Disconnected from Microsoft Defender XDR"
-    Write-Host "Successfully disconnected from Microsoft Defender XDR" -ForegroundColor Green
+    Write-Information "Successfully disconnected from Microsoft Defender XDR" -InformationAction Continue
 }
