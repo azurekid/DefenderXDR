@@ -1,0 +1,9 @@
+IndicatorValue,IndicatorType,Action,Title,Description,Severity
+malicious-domain.com,DomainName,Block,Phishing Domain,Known phishing campaign,High
+evil-site.net,DomainName,AlertAndBlock,Malware Distribution,Malware hosting site,High
+suspicious-domain.org,DomainName,Alert,Suspicious Domain,Under investigation,Medium
+192.0.2.100,IpAddress,Block,Command and Control,Known C2 infrastructure,High
+198.51.100.50,IpAddress,Alert,Scanning IP,Port scanning detected,Low
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,FileSha256,Block,Ransomware Hash,Known ransomware variant,High
+da39a3ee5e6b4b0d3255bfef95601890afd80709,FileSha1,Block,Trojan Hash,Banking trojan,High
+http://malicious-url.com/payload,Url,Block,Malicious URL,Drive-by download,High
