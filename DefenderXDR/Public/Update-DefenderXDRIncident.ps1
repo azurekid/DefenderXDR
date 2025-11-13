@@ -49,6 +49,9 @@ function Update-DefenderXDRIncident {
     )
 
     try {
+        # Validate permissions
+        Test-DefenderXDRPermission -RequiredPermissions @('SecurityIncident.ReadWrite.All') -FunctionName $MyInvocation.MyCommand.Name
+        
         $uri = "$script:GraphBaseUri/$script:GraphAPIVersion/security/incidents/$IncidentId"
         
         $body = @{}

@@ -289,23 +289,75 @@ Write-Host "Submitted $($iocs.Count) threat indicators"
 
 ## API Permissions
 
-To use this module, you need to register an Azure AD application and grant it the following Microsoft Graph API permissions:
+To use this module, you need to register an Azure AD application and grant it the appropriate permissions based on which functions you plan to use.
 
-### Application Permissions (for unattended scripts)
+### Permission Validation
 
-- `SecurityEvents.Read.All`
-- `SecurityEvents.ReadWrite.All`
-- `SecurityActions.Read.All`
-- `SecurityActions.ReadWrite.All`
-- `ThreatIndicators.ReadWrite.OwnedBy`
+**New in this release:** All functions now validate that your access token contains the required permissions before making API calls. If your token lacks the necessary permissions, you'll receive a clear error message indicating which permissions are required.
 
-### Delegated Permissions (for interactive use)
+### Microsoft Graph API Permissions
 
-- `SecurityEvents.Read.All`
-- `SecurityEvents.ReadWrite.All`
-- `SecurityActions.Read.All`
-- `SecurityActions.ReadWrite.All`
-- `ThreatIndicators.ReadWrite.OwnedBy`
+#### Security Alerts Functions
+- **Get-DefenderXDRAlert**: `SecurityEvents.Read.All` or `SecurityEvents.ReadWrite.All`
+- **Update-DefenderXDRAlert**: `SecurityEvents.ReadWrite.All`
+- **New-DefenderXDRAlertComment**: `SecurityEvents.ReadWrite.All`
+
+#### Incident Management Functions
+- **Get-DefenderXDRIncident**: `SecurityIncident.Read.All` or `SecurityIncident.ReadWrite.All`
+- **Update-DefenderXDRIncident**: `SecurityIncident.ReadWrite.All`
+- **New-DefenderXDRIncidentComment**: `SecurityIncident.ReadWrite.All`
+
+#### Threat Intelligence Functions (Graph API)
+- **Get-DefenderXDRThreatIntelligence**: `ThreatIndicators.Read.All` or `ThreatIndicators.ReadWrite.OwnedBy`
+- **Submit-DefenderXDRThreatIndicator**: `ThreatIndicators.ReadWrite.OwnedBy`
+- **Remove-DefenderXDRThreatIndicator**: `ThreatIndicators.ReadWrite.OwnedBy`
+
+#### Security Posture Functions
+- **Get-DefenderXDRSecureScore**: `SecurityEvents.Read.All` or `SecurityEvents.ReadWrite.All`
+- **Get-DefenderXDRSecureScoreControlProfile**: `SecurityEvents.Read.All` or `SecurityEvents.ReadWrite.All`
+
+#### Advanced Hunting Functions
+- **Invoke-DefenderXDRAdvancedHuntingQuery**: `ThreatHunting.Read.All`
+
+### Defender Endpoint API Permissions
+
+The following functions use the Defender Endpoint API (`api.securitycenter.microsoft.com`) and require different permissions:
+
+#### Threat Indicator Functions (Defender Endpoint API)
+- **Get-DefenderXDRIndicator**: `Ti.Read.All` or `Ti.ReadWrite`
+- **Import-DefenderXDRIndicators**: `Ti.ReadWrite`
+- **Remove-DefenderXDRIndicator**: `Ti.ReadWrite`
+- **Remove-DefenderXDRIndicatorBatch**: `Ti.ReadWrite`
+
+### Recommended Permissions for Common Scenarios
+
+#### Read-Only Security Monitoring
+```
+- SecurityEvents.Read.All
+- SecurityIncident.Read.All
+- ThreatIndicators.Read.All
+- Ti.Read.All
+- ThreatHunting.Read.All
+```
+
+#### Full Security Operations
+```
+- SecurityEvents.ReadWrite.All
+- SecurityIncident.ReadWrite.All
+- ThreatIndicators.ReadWrite.OwnedBy
+- Ti.ReadWrite
+- ThreatHunting.Read.All
+```
+
+#### Threat Intelligence Management Only
+```
+- ThreatIndicators.ReadWrite.OwnedBy (Graph API)
+- Ti.ReadWrite (Defender Endpoint API)
+```
+
+### Permission Types
+
+The module supports both **Application permissions** (for unattended scripts/service principals) and **Delegated permissions** (for interactive use). The permission validation works with both types.
 
 ## Error Handling
 

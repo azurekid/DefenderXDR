@@ -20,6 +20,9 @@ function Remove-DefenderXDRIndicatorBatch {
     )
 
     try {
+        # Validate permissions
+        Test-DefenderXDRPermission -RequiredPermissions @('Ti.ReadWrite') -FunctionName $MyInvocation.MyCommand.Name
+        
         $baseUri = "https://api.securitycenter.microsoft.com/api"
         $uri = "$baseUri/indicators/BatchDelete"
 
