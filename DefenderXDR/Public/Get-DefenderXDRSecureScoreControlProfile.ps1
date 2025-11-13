@@ -23,6 +23,9 @@ function Get-DefenderXDRSecureScoreControlProfile {
     )
 
     try {
+        # Validate permissions
+        Test-DefenderXDRPermission -RequiredPermissions @('SecurityEvents.Read.All', 'SecurityEvents.ReadWrite.All') -FunctionName $MyInvocation.MyCommand.Name
+        
         if ($PSCmdlet.ParameterSetName -eq 'ById') {
             $uri = "$script:GraphBaseUri/$script:GraphAPIVersion/security/secureScoreControlProfiles/$ControlId"
         }

@@ -28,6 +28,9 @@ function Invoke-DefenderXDRAdvancedHuntingQuery {
     )
 
     try {
+        # Validate permissions
+        Test-DefenderXDRPermission -RequiredPermissions @('ThreatHunting.Read.All') -FunctionName $MyInvocation.MyCommand.Name
+        
         $uri = "$script:GraphBaseUri/$script:GraphAPIVersion/security/runHuntingQuery"
         
         $body = @{

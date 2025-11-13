@@ -17,6 +17,9 @@ function Remove-DefenderXDRThreatIndicator {
 
     process {
         try {
+            # Validate permissions
+            Test-DefenderXDRPermission -RequiredPermissions @('ThreatIndicators.ReadWrite.OwnedBy') -FunctionName $MyInvocation.MyCommand.Name
+            
             $uri = "$script:GraphBaseUri/$script:GraphAPIBetaVersion/security/tiIndicators/$IndicatorId"
 
             if ($PSCmdlet.ShouldProcess($IndicatorId, "Remove threat indicator")) {

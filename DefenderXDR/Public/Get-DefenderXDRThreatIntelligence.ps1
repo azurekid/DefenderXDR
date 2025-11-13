@@ -35,6 +35,9 @@ function Get-DefenderXDRThreatIntelligence {
     )
 
     try {
+        # Validate permissions
+        Test-DefenderXDRPermission -RequiredPermissions @('ThreatIndicators.Read.All', 'ThreatIndicators.ReadWrite.OwnedBy') -FunctionName $MyInvocation.MyCommand.Name
+        
         if ($PSCmdlet.ParameterSetName -eq 'ById') {
             $uri = "$script:GraphBaseUri/$script:GraphAPIBetaVersion/security/tiIndicators/$IndicatorId"
         }

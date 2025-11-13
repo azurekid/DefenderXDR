@@ -56,6 +56,9 @@ function Submit-DefenderXDRThreatIndicator {
     )
 
     try {
+        # Validate permissions
+        Test-DefenderXDRPermission -RequiredPermissions @('ThreatIndicators.ReadWrite.OwnedBy') -FunctionName $MyInvocation.MyCommand.Name
+        
         $uri = "$script:GraphBaseUri/$script:GraphAPIBetaVersion/security/tiIndicators"
         
         $body = @{

@@ -45,6 +45,9 @@ function Get-DefenderXDRIndicator {
     )
 
     try {
+        # Validate permissions
+        Test-DefenderXDRPermission -RequiredPermissions @('Ti.Read.All', 'Ti.ReadWrite') -FunctionName $MyInvocation.MyCommand.Name
+        
         # Use Defender Endpoint API
         $baseUri = "https://api.securitycenter.microsoft.com/api"
         

@@ -21,6 +21,9 @@ function New-DefenderXDRIncidentComment {
     )
 
     try {
+        # Validate permissions
+        Test-DefenderXDRPermission -RequiredPermissions @('SecurityIncident.ReadWrite.All') -FunctionName $MyInvocation.MyCommand.Name
+        
         $uri = "$script:GraphBaseUri/$script:GraphAPIVersion/security/incidents/$IncidentId/comments"
         
         $body = @{
