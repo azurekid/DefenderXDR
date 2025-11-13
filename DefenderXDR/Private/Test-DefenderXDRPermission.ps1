@@ -37,10 +37,10 @@ function Test-DefenderXDRPermission {
 
         $payload = $tokenParts[1]
         # Add padding if needed for Base64 decoding
-        while ($payload.Length % 4 -ne 0) { 
-            $payload += '=' 
+        while ($payload.Length % 4 -ne 0) {
+            $payload += '='
         }
-        
+
         $payloadJson = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($payload))
         $tokenData = $payloadJson | ConvertFrom-Json
 
@@ -48,11 +48,11 @@ function Test-DefenderXDRPermission {
         # Application permissions are in 'roles' claim
         # Delegated permissions are in 'scp' claim (space-separated)
         $tokenPermissions = @()
-        
+
         if ($tokenData.roles) {
             $tokenPermissions += $tokenData.roles
         }
-        
+
         if ($tokenData.scp) {
             $tokenPermissions += $tokenData.scp -split ' '
         }
@@ -64,20 +64,35 @@ function Test-DefenderXDRPermission {
         }
 
         # Check if any of the required permissions exist in the token
+        # Support wildcard matching: a token permission ending in .All can satisfy a requirement without .All
+        # For example: Ti.ReadWrite.All satisfies Ti.ReadWrite
         $hasPermission = $false
+
         foreach ($required in $RequiredPermissions) {
+            # Check for exact match first
             if ($tokenPermissions -contains $required) {
                 $hasPermission = $true
-                Write-Verbose "Permission validated: $required"
+                Write-Verbose "Permission validated (exact match): $required"
                 break
+            }
+
+            # Check if token has a more permissive version (with .All suffix)
+            # For example, if required is "Ti.ReadWrite", check if token has "Ti.ReadWrite.All"
+            if (-not $required.EndsWith('.All')) {
+                $permissiveVersion = "$required.All"
+                if ($tokenPermissions -contains $permissiveVersion) {
+                    $hasPermission = $true
+                    Write-Verbose "Permission validated (permissive match): $permissiveVersion satisfies $required"
+                    break
+                }
             }
         }
 
         if (-not $hasPermission) {
-            $errorMessage = "Insufficient permissions for $FunctionName. "
-            $errorMessage += "Required: $($RequiredPermissions -join ' or '). "
+            $errorMessage = "Insufficient permissions for $FunctionName.`n"
+            $errorMessage += "Required: One of the following permissions is needed: $($RequiredPermissions -join ' or ').`n"
             $errorMessage += "Token has: $($tokenPermissions -join ', ')"
-            throw $errorMessage
+            Write-Error $errorMessage -ErrorAction Stop
         }
 
         Write-Verbose "Permission check passed for $FunctionName"
@@ -85,6 +100,7 @@ function Test-DefenderXDRPermission {
     }
     catch {
         if ($_.Exception.Message -like "Insufficient permissions*") {
+            # Re-throw permission errors as they should stop execution
             throw
         }
         Write-Warning "Unable to validate permissions for $FunctionName`: $_"
