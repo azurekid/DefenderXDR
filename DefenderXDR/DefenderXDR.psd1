@@ -83,7 +83,7 @@
         
         # Threat Intelligence (Defender Endpoint API)
         'Get-DefenderXDRIndicator',
-        'New-DefenderXDRIndicator',
+        'Submit-DefenderXDRIndicator',
         'Import-DefenderXDRIndicators',
         'Remove-DefenderXDRIndicator',
         'Remove-DefenderXDRIndicatorBatch',

@@ -30,7 +30,7 @@ if ($allIndicators.Count -gt 0) {
 Write-Host "`nExample 3: Creating a single threat indicator..." -ForegroundColor Yellow
 
 # Uncomment to actually create:
-# $newIndicator = New-DefenderXDRIndicator -IndicatorValue "example-test.com" `
+# $newIndicator = Submit-DefenderXDRIndicator -IndicatorValue "example-test.com" `
 #                                          -IndicatorType "DomainName" `
 #                                          -Action "AlertAndBlock" `
 #                                          -Title "Test Domain Indicator" `
@@ -134,13 +134,13 @@ else {
     Write-Host "No expired indicators found"
 }
 
-# Example 9: Pipeline usage with New-DefenderXDRIndicator
+# Example 9: Pipeline usage with Submit-DefenderXDRIndicator
 Write-Host "`nExample 9: Using pipeline to recreate/update indicators..." -ForegroundColor Yellow
-# You can pipe indicators from Get-DefenderXDRIndicator to New-DefenderXDRIndicator
+# You can pipe indicators from Get-DefenderXDRIndicator to Submit-DefenderXDRIndicator
 # This is useful for copying indicators or recreating them with modifications
 # Uncomment to actually use:
 # $indicator = Get-DefenderXDRIndicator -IndicatorId "123"
-# $indicator | New-DefenderXDRIndicator
+# $indicator | Submit-DefenderXDRIndicator
 
 # Example 10: Pipeline usage for removal
 Write-Host "`nExample 10: Using pipeline for removal..." -ForegroundColor Yellow
