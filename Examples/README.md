@@ -48,7 +48,7 @@ This example demonstrates:
 **Use Case**: Proactive threat hunting and security investigations
 
 ### 04-Threat-Intelligence.ps1
-**Purpose**: Managing threat intelligence indicators
+**Purpose**: Managing threat intelligence indicators (Graph API)
 
 This example demonstrates:
 - Submitting threat indicators (domains, IPs, file hashes)
@@ -57,7 +57,20 @@ This example demonstrates:
 - Removing indicators
 - Different indicator types and actions
 
-**Use Case**: IOC management and threat intelligence integration
+**Use Case**: IOC management and threat intelligence integration using Graph API
+
+### 05-Defender-Endpoint-Indicators.ps1
+**Purpose**: Managing threat indicators using Defender Endpoint API
+
+This example demonstrates:
+- Retrieving threat indicators from Defender Endpoint API
+- Getting specific indicators by ID
+- Filtering and ordering indicators
+- Bulk importing multiple indicators
+- Single and batch removal operations
+- Pipeline usage for indicator management
+
+**Use Case**: Advanced IOC management using the native Defender Endpoint API with support for bulk operations
 
 ## How to Use These Examples
 

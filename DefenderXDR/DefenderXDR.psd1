@@ -76,10 +76,16 @@
         'Update-DefenderXDRIncident',
         'New-DefenderXDRIncidentComment',
         
-        # Threat Intelligence
+        # Threat Intelligence (Graph API)
         'Get-DefenderXDRThreatIntelligence',
         'Submit-DefenderXDRThreatIndicator',
         'Remove-DefenderXDRThreatIndicator',
+        
+        # Threat Intelligence (Defender Endpoint API)
+        'Get-DefenderXDRIndicator',
+        'Import-DefenderXDRIndicators',
+        'Remove-DefenderXDRIndicator',
+        'Remove-DefenderXDRIndicatorBatch',
         
         # Security Configuration
         'Get-DefenderXDRSecureScore',

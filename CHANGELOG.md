@@ -48,7 +48,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned
+### Added
+- Defender Endpoint API support for threat indicators:
+  - `Get-DefenderXDRIndicator` - Get threat indicators via Defender Endpoint API
+  - `Import-DefenderXDRIndicators` - Bulk import threat indicators
+  - `Remove-DefenderXDRIndicator` - Remove single threat indicator
+  - `Remove-DefenderXDRIndicatorBatch` - Batch remove multiple threat indicators
+- New example script (05-Defender-Endpoint-Indicators.ps1) demonstrating Defender Endpoint API usage
+- Updated documentation with Defender Endpoint API examples
+
+### Changed
+- `Invoke-DefenderXDRRequest` now supports both Graph API and Defender Endpoint API endpoints
+- Updated module to export 19 functions (increased from 15)
+
+## [Planned]
 - Interactive authentication using MSAL
 - Certificate-based authentication
 - Managed Identity support

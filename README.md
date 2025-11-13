@@ -160,7 +160,49 @@ $controls = Get-DefenderXDRSecureScoreControlProfile
 $mfaControl = Get-DefenderXDRSecureScoreControlProfile -ControlId "AdminMFA"
 ```
 
-### 7. Advanced Hunting
+### 7. Defender Endpoint API - Threat Indicators
+
+```powershell
+# Get all threat indicators
+$indicators = Get-DefenderXDRIndicator -Top 100
+
+# Get specific indicator by ID
+$indicator = Get-DefenderXDRIndicator -IndicatorId "12345"
+
+# Filter indicators
+$highSeverity = Get-DefenderXDRIndicator -Filter "severity eq 'High'" -OrderBy "creationTime desc"
+
+# Bulk import indicators
+$indicatorsToImport = @(
+    @{
+        indicatorValue = "malicious.com"
+        indicatorType = "DomainName"
+        action = "Block"
+        severity = "High"
+        title = "Malicious Domain"
+        description = "Known phishing domain"
+        expirationTime = (Get-Date).AddDays(30).ToString('o')
+    },
+    @{
+        indicatorValue = "192.0.2.1"
+        indicatorType = "IpAddress"
+        action = "Alert"
+        severity = "Medium"
+        title = "Suspicious IP"
+    }
+)
+Import-DefenderXDRIndicators -Indicators $indicatorsToImport
+
+# Remove single indicator
+Remove-DefenderXDRIndicator -IndicatorId "12345"
+
+# Batch remove expired indicators
+$expired = Get-DefenderXDRIndicator -Filter "expirationTime lt $(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssZ')"
+$expiredIds = $expired | Select-Object -ExpandProperty id
+Remove-DefenderXDRIndicatorBatch -IndicatorIds $expiredIds
+```
+
+### 8. Advanced Hunting
 
 ```powershell
 # Simple query
@@ -181,7 +223,7 @@ $results = Invoke-DefenderXDRAdvancedHuntingQuery -Query $query
 $results | Export-Csv -Path "hunting_results.csv" -NoTypeInformation
 ```
 
-### 8. Disconnect
+### 9. Disconnect
 
 ```powershell
 # Disconnect and clear stored credentials
@@ -310,10 +352,16 @@ $VerbosePreference = 'SilentlyContinue'
 - `Update-DefenderXDRIncident` - Update an incident
 - `New-DefenderXDRIncidentComment` - Add comment to an incident
 
-### Threat Intelligence
-- `Get-DefenderXDRThreatIntelligence` - Get threat indicators
-- `Submit-DefenderXDRThreatIndicator` - Submit a threat indicator
-- `Remove-DefenderXDRThreatIndicator` - Remove a threat indicator
+### Threat Intelligence (Graph API)
+- `Get-DefenderXDRThreatIntelligence` - Get threat indicators via Graph API
+- `Submit-DefenderXDRThreatIndicator` - Submit a threat indicator via Graph API
+- `Remove-DefenderXDRThreatIndicator` - Remove a threat indicator via Graph API
+
+### Threat Intelligence (Defender Endpoint API)
+- `Get-DefenderXDRIndicator` - Get threat indicators via Defender Endpoint API
+- `Import-DefenderXDRIndicators` - Bulk import threat indicators
+- `Remove-DefenderXDRIndicator` - Remove a single threat indicator
+- `Remove-DefenderXDRIndicatorBatch` - Batch remove multiple threat indicators
 
 ### Security Posture
 - `Get-DefenderXDRSecureScore` - Get Secure Score

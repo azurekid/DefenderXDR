@@ -1,9 +1,9 @@
 function Invoke-DefenderXDRRequest {
     <#
     .SYNOPSIS
-        Internal function to make HTTP requests to Microsoft Graph API
+        Internal function to make HTTP requests to Microsoft Defender APIs
     .DESCRIPTION
-        Handles HTTP requests to the Microsoft Graph API with error handling and token validation
+        Handles HTTP requests to Microsoft Graph API and Defender Endpoint API with error handling and token validation
     .PARAMETER Uri
         The URI endpoint to call
     .PARAMETER Method
@@ -14,6 +14,8 @@ function Invoke-DefenderXDRRequest {
         Content type for the request
     .EXAMPLE
         Invoke-DefenderXDRRequest -Uri "https://graph.microsoft.com/v1.0/security/alerts" -Method GET
+    .EXAMPLE
+        Invoke-DefenderXDRRequest -Uri "https://api.securitycenter.microsoft.com/api/indicators" -Method GET
     #>
     [CmdletBinding()]
     param (
@@ -77,7 +79,7 @@ function Invoke-DefenderXDRRequest {
                 $errorMessage = "$errorMessage - $($_.ErrorDetails.Message)"
             }
         }
-        Write-Error "Graph API request failed: $errorMessage"
+        Write-Error "API request failed: $errorMessage"
         throw
     }
 }
