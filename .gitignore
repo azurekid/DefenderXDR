@@ -1,0 +1,42 @@
+# PowerShell
+*.ps1xml
+*.psm1.bak
+*.psd1.bak
+
+# Build artifacts
+build/
+dist/
+*.nupkg
+
+# Test results
+TestResults/
+*.trx
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+temp/
+tmp/
+
+# Credentials (never commit these!)
+*credentials*
+*secrets*
+*.key
+*.pfx
+*.p12
+
+# User-specific
+*.user
