@@ -26,6 +26,9 @@ foreach ($import in @($Classes + $Private + $Public)) {
 # Export public functions
 Export-ModuleMember -Function $Public.BaseName
 
+# Export aliases
+Export-ModuleMember -Alias 'Submit-DefenderXDRThreatIndicator'
+
 # Module variables
 $script:ModuleVersion = '1.0.0'
 $script:GraphAPIVersion = 'v1.0'

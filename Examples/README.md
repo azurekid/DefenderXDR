@@ -239,7 +239,7 @@ $threatFeed = Invoke-RestMethod -Uri "https://your-threat-feed.com/api/indicator
 
 foreach ($ioc in $threatFeed) {
     # Submit to Defender
-    Submit-DefenderXDRThreatIndicator `
+    Set-DefenderXDRThreatIndicator `
         -IndicatorValue $ioc.value `
         -IndicatorType $ioc.type `
         -Action "block" `
