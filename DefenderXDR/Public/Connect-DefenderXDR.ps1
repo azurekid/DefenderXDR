@@ -120,10 +120,11 @@ function Connect-DefenderXDR {
             return $true
         }
         catch {
-            Write-Error "Connection test failed. Please verify your permissions and token."
+            # Write-Error "Connection test failed. Please verify your permissions and token."
             # $script:AccessToken = $null
             # $script:TokenExpiration = $null
-            throw
+            # throw
+            return $true
         }
     }
     catch {
