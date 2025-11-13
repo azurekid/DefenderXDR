@@ -430,7 +430,6 @@ $VerbosePreference = 'SilentlyContinue'
 - `Import-DefenderXDRIndicators` - Bulk import threat indicators
 - `Remove-DefenderXDRIndicator` - Remove a single threat indicator
 - `Remove-DefenderXDRIndicatorBatch` - Batch remove multiple threat indicators
-- `Remove-DefenderXDRIndicatorBatch` - Batch remove multiple threat indicators
 
 ### Security Posture
 - `Get-DefenderXDRSecureScore` - Get Secure Score
