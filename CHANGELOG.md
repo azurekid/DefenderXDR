@@ -55,11 +55,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `Remove-DefenderXDRIndicator` - Remove single threat indicator
   - `Remove-DefenderXDRIndicatorBatch` - Batch remove multiple threat indicators
 - New example script (05-Defender-Endpoint-Indicators.ps1) demonstrating Defender Endpoint API usage
-- Updated documentation with Defender Endpoint API examples
+- **Permission validation for all API calls**: New `Test-DefenderXDRPermission` private function that validates access tokens contain required permissions before making API calls
+- Comprehensive permission documentation in README with function-specific requirements
 
 ### Changed
 - `Invoke-DefenderXDRRequest` now supports both Graph API and Defender Endpoint API endpoints
 - Updated module to export 19 functions (increased from 15)
+- All public functions now validate permissions before making API calls
+- Enhanced error messages to indicate required vs. actual permissions in token
+
+### Security
+- **Improved security**: Access tokens are now validated for required permissions before API calls
+- Clear error messages help users identify missing permissions quickly
+- Supports both Application permissions (roles) and Delegated permissions (scp)
 
 ## [Planned]
 - Interactive authentication using MSAL
