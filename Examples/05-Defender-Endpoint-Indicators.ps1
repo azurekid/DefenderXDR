@@ -26,8 +26,21 @@ if ($allIndicators.Count -gt 0) {
     $firstIndicator | Format-List
 }
 
-# Example 3: Import multiple indicators in bulk
-Write-Host "`nExample 3: Bulk importing threat indicators..." -ForegroundColor Yellow
+# Example 3: Create a single indicator
+Write-Host "`nExample 3: Creating a single threat indicator..." -ForegroundColor Yellow
+
+# Uncomment to actually create:
+# $newIndicator = New-DefenderXDRIndicator -IndicatorValue "example-test.com" `
+#                                          -IndicatorType "DomainName" `
+#                                          -Action "AlertAndBlock" `
+#                                          -Title "Test Domain Indicator" `
+#                                          -Severity "High" `
+#                                          -Description "Example domain for testing purposes" `
+#                                          -ExpirationTime (Get-Date).AddDays(7).ToString('o')
+# Write-Host "Created indicator with ID: $($newIndicator.id)"
+
+# Example 4: Import multiple indicators in bulk
+Write-Host "`nExample 4: Bulk importing threat indicators..." -ForegroundColor Yellow
 
 $indicatorsToImport = @(
     @{
@@ -65,8 +78,8 @@ Write-Host "Importing $($indicatorsToImport.Count) indicators..."
 # $importResult = Import-DefenderXDRIndicators -Indicators $indicatorsToImport
 # Write-Host "Import completed: $($importResult.status)"
 
-# Example 4: Filter indicators
-Write-Host "`nExample 4: Filtering indicators..." -ForegroundColor Yellow
+# Example 5: Filter indicators
+Write-Host "`nExample 5: Filtering indicators..." -ForegroundColor Yellow
 
 # Get high severity indicators
 $highSeverityFilter = "severity eq 'High'"
@@ -77,8 +90,8 @@ Write-Host "Found $($highSeverityIndicators.Count) high severity indicators"
 $domainIndicators = Get-DefenderXDRIndicator -Filter "indicatorType eq 'DomainName'" -Top 20
 Write-Host "Found $($domainIndicators.Count) domain indicators"
 
-# Example 5: Order and pagination
-Write-Host "`nExample 5: Ordering and pagination..." -ForegroundColor Yellow
+# Example 6: Order and pagination
+Write-Host "`nExample 6: Ordering and pagination..." -ForegroundColor Yellow
 
 # Get most recently created indicators
 $recentIndicators = Get-DefenderXDRIndicator -OrderBy "creationTime desc" -Top 10
@@ -91,8 +104,8 @@ if ($recentIndicators.Count -eq 10) {
     Write-Host "Retrieved $($nextPage.Count) indicators from next page"
 }
 
-# Example 6: Remove a single indicator
-Write-Host "`nExample 6: Removing a single indicator..." -ForegroundColor Yellow
+# Example 7: Remove a single indicator
+Write-Host "`nExample 7: Removing a single indicator..." -ForegroundColor Yellow
 # Uncomment to actually remove:
 # if ($allIndicators.Count -gt 0) {
 #     $indicatorToRemove = $allIndicators[-1].id
@@ -100,8 +113,8 @@ Write-Host "`nExample 6: Removing a single indicator..." -ForegroundColor Yellow
 #     Write-Host "Removed indicator: $indicatorToRemove"
 # }
 
-# Example 7: Batch remove indicators
-Write-Host "`nExample 7: Batch removing expired indicators..." -ForegroundColor Yellow
+# Example 8: Batch remove indicators
+Write-Host "`nExample 8: Batch removing expired indicators..." -ForegroundColor Yellow
 
 # Get expired indicators
 $expiredIndicators = Get-DefenderXDRIndicator -Filter "expirationTime lt $(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssZ')" -Top 100
@@ -118,8 +131,8 @@ else {
     Write-Host "No expired indicators found"
 }
 
-# Example 8: Pipeline usage
-Write-Host "`nExample 8: Using pipeline for removal..." -ForegroundColor Yellow
+# Example 9: Pipeline usage
+Write-Host "`nExample 9: Using pipeline for removal..." -ForegroundColor Yellow
 # Uncomment to actually remove:
 # Get-DefenderXDRIndicator -Filter "severity eq 'Informational'" | 
 #     Where-Object { $_.expirationTime -lt (Get-Date) } |
