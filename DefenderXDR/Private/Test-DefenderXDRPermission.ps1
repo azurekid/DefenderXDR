@@ -97,7 +97,7 @@ function Test-DefenderXDRPermission {
         }
 
         Write-Verbose "Permission check passed for $FunctionName"
-        return $true
+        return $false
     }
     catch {
         Write-Warning "Unable to validate permissions for $FunctionName`: $_"
