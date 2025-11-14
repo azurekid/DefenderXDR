@@ -89,17 +89,21 @@ function Test-DefenderXDRPermission {
         }
 
         if (-not $hasPermission) {
-            $warningMessage = "Insufficient permissions for $FunctionName.`n"
-            $warningMessage += "Required: One of the following permissions is needed: $($RequiredPermissions -join ' or ').`n"
-            $warningMessage += "Token has: $($tokenPermissions -join ', ')"
-            Write-Warning $warningMessage
-            return $false  # Allow the request to proceed, API will reject if permissions are insufficient
+            $errorMessage = "Insufficient permissions for $FunctionName.`n"
+            $errorMessage += "Required: One of the following permissions is needed: $($RequiredPermissions -join ' or ').`n"
+            $errorMessage += "Token has: $($tokenPermissions -join ', ')"
+            throw $errorMessage
         }
 
         Write-Verbose "Permission check passed for $FunctionName"
         return $true
     }
     catch {
+        # If this is a permission error we threw, re-throw it to stop execution
+        if ($_.Exception.Message -match "Insufficient permissions") {
+            throw
+        }
+        # Otherwise, it's an error in the validation process itself, allow the request to proceed
         Write-Warning "Unable to validate permissions for $FunctionName`: $_"
         return $true  # Allow the request to proceed if we can't validate
     }
