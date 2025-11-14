@@ -37,5 +37,6 @@ $script:GraphBaseUri = 'https://graph.microsoft.com'
 $script:AccessToken = $null
 $script:TokenExpiration = $null
 $script:TenantId = $null
+$script:hasPermission = $false
 
 Write-Verbose "DefenderXDR module loaded successfully"
