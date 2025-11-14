@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Use without `-IndicatorId` to create a new indicator (requires `-IndicatorValue`, `-IndicatorType`, and `-Action`)
   - Use with `-IndicatorId` to update an existing indicator (all other parameters are optional)
 - Added backward compatibility alias `Submit-DefenderXDRThreatIndicator` for existing scripts
+- **Permission validation now uses warnings instead of errors**: When an access token has insufficient permissions, functions now display a warning message and allow the API call to proceed, letting the API return its own error if needed. This provides a more consistent user experience and prevents terminating errors during permission validation.
 
 ## [1.0.0] - 2025-11-13
 
