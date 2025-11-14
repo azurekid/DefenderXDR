@@ -93,11 +93,11 @@ function Test-DefenderXDRPermission {
             $warningMessage += "Required: One of the following permissions is needed: $($RequiredPermissions -join ' or ').`n"
             $warningMessage += "Token has: $($tokenPermissions -join ', ')"
             Write-Warning $warningMessage
-            return $true  # Allow the request to proceed, API will reject if permissions are insufficient
+            return $false  # Allow the request to proceed, API will reject if permissions are insufficient
         }
 
         Write-Verbose "Permission check passed for $FunctionName"
-        return $false
+        return $true
     }
     catch {
         Write-Warning "Unable to validate permissions for $FunctionName`: $_"
