@@ -96,15 +96,15 @@ function Test-DefenderXDRPermission {
         }
 
         Write-Verbose "Permission check passed for $FunctionName"
-        return $true
+        return
     }
     catch {
         # If this is a permission error we threw, re-throw it to stop execution
         if ($_.Exception.Message -match "Insufficient permissions") {
-            throw
+            return
         }
         # Otherwise, it's an error in the validation process itself, allow the request to proceed
         Write-Warning "Unable to validate permissions for $FunctionName`: $_"
-        return $true  # Allow the request to proceed if we can't validate
+        return  # Allow the request to proceed if we can't validate
     }
 }
