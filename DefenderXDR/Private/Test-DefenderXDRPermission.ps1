@@ -71,7 +71,7 @@ function Test-DefenderXDRPermission {
         foreach ($required in $RequiredPermissions) {
             # Check for exact match first
             if ($tokenPermissions -contains $required) {
-                $hasPermission = $true
+                $script:hasPermission = $true
                 Write-Verbose "Permission validated (exact match): $required"
                 break
             }
@@ -81,7 +81,7 @@ function Test-DefenderXDRPermission {
             if (-not $required.EndsWith('.All')) {
                 $permissiveVersion = "$required.All"
                 if ($tokenPermissions -contains $permissiveVersion) {
-                    $hasPermission = $true
+                    $script:hasPermission = $true
                     Write-Verbose "Permission validated (permissive match): $permissiveVersion satisfies $required"
                     break
                 }
@@ -92,7 +92,7 @@ function Test-DefenderXDRPermission {
             $errorMessage = "Insufficient permissions for $FunctionName.`n"
             $errorMessage += "Required: One of the following permissions is needed: $($RequiredPermissions -join ' or ').`n"
             $errorMessage += "Token has: $($tokenPermissions -join ', ')"
-            throw $errorMessage
+            $script:hasPermission = $false
         }
 
         Write-Verbose "Permission check passed for $FunctionName"
