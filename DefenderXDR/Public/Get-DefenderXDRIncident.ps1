@@ -42,6 +42,8 @@ function Get-DefenderXDRIncident {
     try {
         # Validate permissions
         Test-DefenderXDRPermission -RequiredPermissions @('SecurityIncident.Read.All', 'SecurityIncident.ReadWrite.All') -FunctionName $MyInvocation.MyCommand.Name
+
+        if (-not($hasPermission)) { break }
         
         if ($PSCmdlet.ParameterSetName -eq 'ById') {
             $uri = "$script:GraphBaseUri/$script:GraphAPIVersion/security/incidents/$IncidentId"
