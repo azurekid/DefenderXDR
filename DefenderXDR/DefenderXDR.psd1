@@ -12,19 +12,19 @@
     GUID = '8a3c7b9e-4d5f-4a8b-9c2e-1f3d4e5a6b7c'
 
     # Author of this module
-    Author = 'DefenderXDR Contributors'
+    Author = 'azurekid (Rogier Dijkman)'
 
     # Company or vendor of this module
     CompanyName = 'Community'
 
     # Copyright statement for this module
-    Copyright = '(c) 2025 DefenderXDR Contributors. All rights reserved.'
+    Copyright = ''
 
     # Description of the functionality provided by this module
     Description = 'PowerShell module for managing Microsoft Defender XDR (Extended Detection and Response) configurations through Microsoft Graph API'
 
     # Minimum version of the PowerShell engine required by this module
-    PowerShellVersion = '5.1'
+    PowerShellVersion = '7'
 
     # Name of the PowerShell host required by this module
     # PowerShellHostName = ''
