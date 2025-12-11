@@ -72,6 +72,21 @@ This example demonstrates:
 
 **Use Case**: Advanced IOC management using the native Defender Endpoint API with support for bulk operations
 
+### 06-Custom-Detection-Rules.ps1
+**Purpose**: Managing custom detection rules in Defender XDR
+
+This example demonstrates:
+- Creating custom detection rules based on KQL queries
+- Retrieving and filtering detection rules
+- Updating detection rule properties (severity, status, etc.)
+- Disabling and enabling rules
+- Removing detection rules
+- Bulk operations for creating multiple rules
+- Using MITRE ATT&CK techniques and categories
+- Configuring custom schedules for rule execution
+
+**Use Case**: Automating the creation and management of custom detection rules for threat hunting and security monitoring
+
 ## How to Use These Examples
 
 ### Step 1: Update Credentials

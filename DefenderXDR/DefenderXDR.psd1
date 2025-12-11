@@ -76,6 +76,12 @@
         'Update-DefenderXDRIncident',
         'New-DefenderXDRIncidentComment',
         
+        # Detection Rules
+        'Get-DefenderXDRDetectionRule',
+        'New-DefenderXDRDetectionRule',
+        'Update-DefenderXDRDetectionRule',
+        'Remove-DefenderXDRDetectionRule',
+        
         # Threat Intelligence (Graph API)
         'Get-DefenderXDRThreatIntelligence',
         'Set-DefenderXDRThreatIndicator',
