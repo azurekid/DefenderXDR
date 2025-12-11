@@ -23,6 +23,11 @@ This module provides a comprehensive set of cmdlets to interact with Microsoft D
   - Update incident properties
   - Add comments to incidents
 
+- **Custom Detection Rules**
+  - Create custom detection rules based on KQL queries
+  - Get and manage detection rules
+  - Update and remove detection rules
+
 - **Threat Intelligence**
   - Get threat intelligence indicators
   - Submit new threat indicators
@@ -123,7 +128,48 @@ Update-DefenderXDRIncident -IncidentId "123" -Status "active" -AssignedTo "soc-t
 New-DefenderXDRIncidentComment -IncidentId "123" -Comment "Escalating to Tier 2"
 ```
 
-### 5. Threat Intelligence
+### 5. Custom Detection Rules
+
+```powershell
+# Get all detection rules
+$rules = Get-DefenderXDRDetectionRule
+
+# Get a specific detection rule
+$rule = Get-DefenderXDRDetectionRule -RuleId "12345678-1234-1234-1234-123456789012"
+
+# Create a new detection rule
+New-DefenderXDRDetectionRule -DisplayName "Suspicious PowerShell Execution" `
+                              -QueryCondition "DeviceProcessEvents | where FileName == 'powershell.exe' and ProcessCommandLine contains 'Invoke-Expression'" `
+                              -Severity "high" `
+                              -Description "Detects suspicious PowerShell execution patterns" `
+                              -Category "Execution" `
+                              -MitreTechniques @("T1059.001")
+
+# Create a detection rule with schedule
+$schedule = @{ 
+    period = 'PT1H'  # Run every hour (ISO 8601 duration format)
+}
+New-DefenderXDRDetectionRule -DisplayName "Failed Login Attempts" `
+                              -QueryCondition "SigninLogs | where ResultType != 0 | summarize FailedAttempts=count() by UserPrincipalName | where FailedAttempts > 5" `
+                              -Severity "medium" `
+                              -Schedule $schedule
+
+# Update a detection rule
+Update-DefenderXDRDetectionRule -RuleId "12345678-1234-1234-1234-123456789012" `
+                                 -Severity "high" `
+                                 -IsEnabled $true
+
+# Disable a detection rule
+Update-DefenderXDRDetectionRule -RuleId "12345678-1234-1234-1234-123456789012" -IsEnabled $false
+
+# Remove a detection rule
+Remove-DefenderXDRDetectionRule -RuleId "12345678-1234-1234-1234-123456789012"
+
+# Get only enabled rules
+$enabledRules = Get-DefenderXDRDetectionRule -Filter "isEnabled eq true"
+```
+
+### 6. Threat Intelligence
 
 ```powershell
 # Get threat indicators
@@ -152,7 +198,7 @@ Set-DefenderXDRThreatIndicator -IndicatorId "ti123..." `
 Remove-DefenderXDRThreatIndicator -IndicatorId "ti123..."
 ```
 
-### 6. Security Posture
+### 7. Security Posture
 
 ```powershell
 # Get current Secure Score
@@ -165,7 +211,7 @@ $controls = Get-DefenderXDRSecureScoreControlProfile
 $mfaControl = Get-DefenderXDRSecureScoreControlProfile -ControlId "AdminMFA"
 ```
 
-### 7. Defender Endpoint API - Threat Indicators
+### 8. Defender Endpoint API - Threat Indicators
 
 ```powershell
 # Get all threat indicators
@@ -216,7 +262,7 @@ $expiredIds = $expired | Select-Object -ExpandProperty id
 Remove-DefenderXDRIndicatorBatch -IndicatorIds $expiredIds
 ```
 
-### 8. Advanced Hunting
+### 9. Advanced Hunting
 
 ```powershell
 # Simple query
@@ -237,7 +283,7 @@ $results = Invoke-DefenderXDRAdvancedHuntingQuery -Query $query
 $results | Export-Csv -Path "hunting_results.csv" -NoTypeInformation
 ```
 
-### 9. Disconnect
+### 10. Disconnect
 
 ```powershell
 # Disconnect and clear stored credentials
@@ -326,6 +372,12 @@ This ensures that tokens with broader permissions can be used for operations req
 - **Get-DefenderXDRIncident**: `SecurityIncident.Read.All` or `SecurityIncident.ReadWrite.All`
 - **Update-DefenderXDRIncident**: `SecurityIncident.ReadWrite.All`
 - **New-DefenderXDRIncidentComment**: `SecurityIncident.ReadWrite.All`
+
+#### Custom Detection Rules Functions
+- **Get-DefenderXDRDetectionRule**: `SecurityEvents.Read.All` or `SecurityEvents.ReadWrite.All`
+- **New-DefenderXDRDetectionRule**: `SecurityEvents.ReadWrite.All`
+- **Update-DefenderXDRDetectionRule**: `SecurityEvents.ReadWrite.All`
+- **Remove-DefenderXDRDetectionRule**: `SecurityEvents.ReadWrite.All`
 
 #### Threat Intelligence Functions (Graph API)
 - **Get-DefenderXDRThreatIntelligence**: `ThreatIndicators.Read.All` or `ThreatIndicators.ReadWrite.OwnedBy`
@@ -423,6 +475,12 @@ $VerbosePreference = 'SilentlyContinue'
 - `Get-DefenderXDRIncident` - Get incidents
 - `Update-DefenderXDRIncident` - Update an incident
 - `New-DefenderXDRIncidentComment` - Add comment to an incident
+
+### Custom Detection Rules
+- `Get-DefenderXDRDetectionRule` - Get custom detection rules
+- `New-DefenderXDRDetectionRule` - Create a new custom detection rule
+- `Update-DefenderXDRDetectionRule` - Update a detection rule
+- `Remove-DefenderXDRDetectionRule` - Remove a detection rule
 
 ### Threat Intelligence (Graph API)
 - `Get-DefenderXDRThreatIntelligence` - Get threat indicators via Graph API
