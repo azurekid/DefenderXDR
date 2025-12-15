@@ -15,6 +15,8 @@ function Connect-DefenderXDR {
         Azure AD Application Client Secret
     .PARAMETER Scopes
         Required permission scopes (for documentation purposes - used in future authentication methods)
+    .PARAMETER Audience
+        Target API audience: 'Graph' for Microsoft Graph Security, or 'Security' for Defender Security API (https://api.security.microsoft.com). Defaults to 'Graph'.
     .EXAMPLE
         Connect-DefenderXDR -AccessToken "eyJ0eXAiOi..."
     .EXAMPLE
@@ -44,7 +46,11 @@ function Connect-DefenderXDR {
             'SecurityActions.Read.All',
             'SecurityActions.ReadWrite.All',
             'ThreatIndicators.ReadWrite.OwnedBy'
-        )
+        ),
+
+        [Parameter(Mandatory = $false)]
+        [ValidateSet('Graph','Security')]
+        [string]$Audience = 'Graph'
     )
 
     try {
@@ -52,7 +58,7 @@ function Connect-DefenderXDR {
             'AccessToken' {
                 Write-Verbose "Connecting with provided access token"
                 $script:AccessToken = $AccessToken
-                
+
                 # Decode token to get expiration (basic validation)
                 try {
                     $tokenParts = $AccessToken.Split('.')
@@ -62,40 +68,61 @@ function Connect-DefenderXDR {
                         while ($payload.Length % 4 -ne 0) { $payload += '=' }
                         $payloadJson = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($payload))
                         $tokenData = $payloadJson | ConvertFrom-Json
-                        
+
                         if ($tokenData.exp) {
                             $script:TokenExpiration = [DateTimeOffset]::FromUnixTimeSeconds($tokenData.exp).LocalDateTime
-                            Write-Verbose "Token expires at: $($script:TokenExpiration)"
+                            Write-Verbose "Token exires at: $($script:TokenExpiration)"
                         }
-                        
+
                         if ($tokenData.tid) {
                             $script:TenantId = $tokenData.tid
                         }
+
+                        # Determine audience from token 'aud' claim if available
+                        $resolvedAudience = $Audience
+                        if ($tokenData.aud) {
+                            $audClaim = [string]$tokenData.aud
+                            if ($audClaim -match 'graph\.microsoft\.com') {
+                                $resolvedAudience = 'Graph'
+                            }
+                            elseif ($audClaim -match 'api\.security\.microsoft\.com' -or $audClaim -match 'api\.securitycenter\.microsoft\.com') {
+                                $resolvedAudience = 'Security'
+                            }
+                        }
+
+                        if ($resolvedAudience -ne $Audience) {
+                            Write-Verbose "Audience overridden by token aud claim: $resolvedAudience"
+                        }
+
+                        $script:ApiAudience = $resolvedAudience
                     }
                 }
                 catch {
                     Write-Warning "Could not decode token information: $_"
+                    $script:ApiAudience = $Audience
                 }
             }
 
             'ClientSecret' {
-                Write-Verbose "Connecting with Client ID and Secret for tenant: $TenantId"
-                
+                Write-Verbose "Connecting with Client ID and Secret for tenant: $TenantId (Audience: $Audience)"
+
                 # Get token using client credentials
+                $scopeValue = if ($Audience -eq 'Security') { 'https://api.security.microsoft.com/.default' } else { 'https://graph.microsoft.com/.default' }
                 $body = @{
                     client_id     = $ClientId
                     client_secret = $ClientSecret
-                    scope         = 'https://graph.microsoft.com/.default'
+                    scope         = $scopeValue
                     grant_type    = 'client_credentials'
                 }
 
                 $tokenUri = "https://login.microsoftonline.com/$TenantId/oauth2/v2.0/token"
-                
+
                 $response = Invoke-RestMethod -Uri $tokenUri -Method Post -Body $body -ContentType 'application/x-www-form-urlencoded'
-                
+
                 $script:AccessToken = $response.access_token
                 $script:TenantId = $TenantId
-                
+                $script:ApiAudience = $Audience
+
                 if ($response.expires_in) {
                     $script:TokenExpiration = (Get-Date).AddSeconds($response.expires_in)
                     Write-Verbose "Token expires at: $($script:TokenExpiration)"
@@ -108,16 +135,22 @@ function Connect-DefenderXDR {
             }
         }
 
-        # Test the connection
-        $testUri = "$script:GraphBaseUri/$script:GraphAPIVersion/security/alerts?`$top=1"
+        # Test the connection using the selected audience
+        if (-not $script:ApiAudience) { $script:ApiAudience = $Audience }
+        $testUri = if ($script:ApiAudience -eq 'Security') { 'https://api.security.microsoft.com/api/incidents?`$top=1' } else { "$script:GraphBaseUri/$script:GraphAPIVersion/security/alerts?`$top=1" }
         $headers = @{
             'Authorization' = "Bearer $script:AccessToken"
         }
-        
+
         try {
             $null = Invoke-RestMethod -Uri $testUri -Headers $headers -Method Get
-            Write-Information "Successfully connected to Microsoft Defender XDR" -InformationAction Continue
-            return $true
+            if ($script:ApiAudience -eq 'Security') {
+                Write-Information "Successfully connected to Defender Security API (api.security.microsoft.com)" -InformationAction Continue
+            }
+            else {
+                Write-Information "Successfully connected to Microsoft Graph Security" -InformationAction Continue
+            }
+            return
         }
         catch {
             Write-Error "Connection test failed. Please verify your permissions and token."

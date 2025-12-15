@@ -22,9 +22,16 @@ function Test-DefenderXDRPermission {
         [string]$FunctionName
     )
 
+    # Reset permission state for each validation
+    $script:hasPermission = $false
+
     # Check if we have an access token
     if (-not $script:AccessToken) {
-        throw "Not authenticated. Please run Connect-DefenderXDR first."
+        if (-not $script:ConnectionReminderDisplayed) {
+            Write-Warning "You're not connected to Defender XDR yet. Run Connect-DefenderXDR (for example: Connect-DefenderXDR -TenantId <tenantId> -ClientId <clientId> -ClientSecret <secret>) and try again."
+            $script:ConnectionReminderDisplayed = $true
+        }
+        return
     }
 
     try {
@@ -71,8 +78,8 @@ function Test-DefenderXDRPermission {
         foreach ($required in $RequiredPermissions) {
             # Check for exact match first
             if ($tokenPermissions -contains $required) {
-                $script:hasPermission = $true
                 Write-Verbose "Permission validated (exact match): $required"
+                $hasPermission = $true
                 break
             }
 
@@ -81,27 +88,28 @@ function Test-DefenderXDRPermission {
             if (-not $required.EndsWith('.All')) {
                 $permissiveVersion = "$required.All"
                 if ($tokenPermissions -contains $permissiveVersion) {
-                    $script:hasPermission = $true
                     Write-Verbose "Permission validated (permissive match): $permissiveVersion satisfies $required"
+                    $hasPermission = $true
                     break
                 }
             }
         }
 
-        if (-not $hasPermission) {
-            $errorMessage = "Insufficient permissions for $FunctionName.`n"
-            $errorMessage += "Required: One of the following permissions is needed: $($RequiredPermissions -join ' or ').`n"
-            $errorMessage += "Token has: $($tokenPermissions -join ', ')"
-            $script:hasPermission = $false
+        if ($hasPermission) {
+            $script:hasPermission = $true
+            Write-Verbose "Permission check passed for $FunctionName"
+            return
         }
 
-        Write-Verbose "Permission check passed for $FunctionName"
-        return
+        $errorMessage = "Insufficient permissions for $FunctionName.`n"
+        $errorMessage += "Required: One of the following permissions is needed: $($RequiredPermissions -join ' or ').`n"
+        $errorMessage += "Token has: $($tokenPermissions -join ', ')"
+        throw [System.UnauthorizedAccessException]::new($errorMessage)
     }
     catch {
         # If this is a permission error we threw, re-throw it to stop execution
-        if ($_.Exception.Message -match "Insufficient permissions") {
-            return
+        if ($_.Exception -is [System.UnauthorizedAccessException]) {
+            throw
         }
         # Otherwise, it's an error in the validation process itself, allow the request to proceed
         Write-Warning "Unable to validate permissions for $FunctionName`: $_"

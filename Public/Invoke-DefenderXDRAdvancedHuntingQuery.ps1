@@ -31,18 +31,34 @@ function Invoke-DefenderXDRAdvancedHuntingQuery {
         # Validate permissions
         Test-DefenderXDRPermission -RequiredPermissions @('ThreatHunting.Read.All') -FunctionName $MyInvocation.MyCommand.Name
         
-        $uri = "$script:GraphBaseUri/$script:GraphAPIVersion/security/runHuntingQuery"
-        
-        $body = @{
-            Query = $Query
-        }
+        $useSecurity = ($script:ApiAudience -eq 'Security')
+        if ($useSecurity) {
+            $candidates = @(
+                'https://api.security.microsoft.com/api/advancedqueries/run',
+                'https://api.securitycenter.microsoft.com/api/advancedqueries/run'
+            )
+            $body = @{ Query = $Query }
 
-        if ($Timespan) {
-            $body['Timespan'] = $Timespan
+            foreach ($uri in $candidates) {
+                Write-Verbose "Executing advanced hunting query via $uri"
+                try {
+                    $response = Invoke-DefenderXDRRequest -Uri $uri -Method POST -Body $body
+                    if ($response) { break }
+                }
+                catch {
+                    Write-Verbose "Advanced hunting endpoint failed: $uri - $($_.Exception.Message)"
+                    continue
+                }
+            }
+            if (-not $response) { throw "Advanced hunting endpoints failed on Security audience." }
         }
-
-        Write-Verbose "Executing advanced hunting query"
-        $response = Invoke-DefenderXDRRequest -Uri $uri -Method POST -Body $body
+        else {
+            $uri = "$script:GraphBaseUri/$script:GraphAPIVersion/security/runHuntingQuery"
+            $body = @{ Query = $Query }
+            if ($Timespan) { $body['Timespan'] = $Timespan }
+            Write-Verbose "Executing advanced hunting query via Microsoft Graph"
+            $response = Invoke-DefenderXDRRequest -Uri $uri -Method POST -Body $body
+        }
         
         # Parse and return results
         if ($response.results) {

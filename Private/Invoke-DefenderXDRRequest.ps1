@@ -35,7 +35,11 @@ function Invoke-DefenderXDRRequest {
 
     # Check if we have a valid access token
     if (-not $script:AccessToken) {
-        throw "Not authenticated. Please run Connect-DefenderXDR first."
+        if (-not $script:ConnectionReminderDisplayed) {
+            Write-Warning "You're not connected to Defender XDR yet. Run Connect-DefenderXDR (for example: Connect-DefenderXDR -TenantId <tenantId> -ClientId <clientId> -ClientSecret <secret>) and try again."
+            $script:ConnectionReminderDisplayed = $true
+        }
+        return
     }
 
     # Check if token is expired
@@ -64,6 +68,21 @@ function Invoke-DefenderXDRRequest {
     }
 
     try {
+        # Warn if token audience likely mismatches target host
+        try {
+            $uri = [System.Uri]$Uri
+            $targetHost = $uri.Host.ToLowerInvariant()
+            if ($script:ApiAudience -eq 'Security' -and $targetHost -like '*graph.microsoft.com') {
+                Write-Warning "Token audience is Security but target is Graph ($targetHost). Consider connecting with -Audience Graph."
+            }
+            elseif ($script:ApiAudience -eq 'Graph' -and ($targetHost -like '*api.security.microsoft.com' -or $targetHost -like '*api.securitycenter.microsoft.com')) {
+                Write-Warning "Token audience is Graph but target is Defender Security API ($targetHost). Consider connecting with -Audience Security."
+            }
+        }
+        catch {
+            Write-Verbose "Unable to inspect host for audience warning: $($_.Exception.Message)"
+        }
+
         Write-Verbose "Making $Method request to: $Uri"
         $response = Invoke-RestMethod @params
         return $response

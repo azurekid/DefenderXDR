@@ -1,11 +1,12 @@
 function Get-DefenderXDRIndicator {
     <#
     .SYNOPSIS
-        Get threat indicators from Microsoft Defender Endpoint
+        Get threat indicators from Microsoft Defender XDR
     .DESCRIPTION
-        Retrieves threat indicators from Microsoft Defender Endpoint API
+        Retrieves threat indicators from either the Defender Endpoint API or Microsoft Graph Security tiIndicators API
+        (depending on the Connect-DefenderXDR audience used).
         Based on: https://learn.microsoft.com/en-us/defender-endpoint/api/get-ti-indicators-collection
-        and https://learn.microsoft.com/en-us/defender-endpoint/api/ti-indicator
+        and https://learn.microsoft.com/en-us/graph/api/security-list-tiindicators
     .PARAMETER IndicatorId
         Specific indicator ID to retrieve
     .PARAMETER Top
@@ -45,19 +46,30 @@ function Get-DefenderXDRIndicator {
     )
 
     try {
-        # Validate permissions
-        Test-DefenderXDRPermission -RequiredPermissions @('Ti.Read.All', 'Ti.ReadWrite') -FunctionName $MyInvocation.MyCommand.Name
-        
-        if (-not($hasPermission)) { break }
-        
-        # Use Defender Endpoint API
-        $baseUri = "https://api.securitycenter.microsoft.com/api"
+            # Validate permissions for both Defender (Ti.*) and Graph (ThreatIndicators.*) audiences
+            $requiredPermissions = @(
+                'Ti.Read.All',
+                'Ti.ReadWrite',
+                'ThreatIndicators.Read.All',
+                'ThreatIndicators.ReadWrite.All'
+            )
+            Test-DefenderXDRPermission -RequiredPermissions $requiredPermissions -FunctionName $MyInvocation.MyCommand.Name
+
+            if (-not $script:hasPermission) {
+                Write-Verbose "Permission check failed for threat indicators. Aborting request."
+                return
+            }
+
+            $usingGraph = ($script:ApiAudience -eq 'Graph')
+            $securityBaseUri = 'https://api.securitycenter.microsoft.com/api/indicators'
+            $graphBaseUri = "$script:GraphBaseUri/$script:GraphAPIBetaVersion/security/tiIndicators" 
+            $baseUri = if ($usingGraph) { $graphBaseUri } else { $securityBaseUri }
         
         if ($PSCmdlet.ParameterSetName -eq 'ById') {
-            $uri = "$baseUri/indicators/$IndicatorId"
+            $uri = "$baseUri/$IndicatorId"
         }
         else {
-            $uri = "$baseUri/indicators"
+            $uri = $baseUri
             
             $queryParams = @()
             if ($Top) { $queryParams += "`$top=$Top" }

@@ -43,13 +43,16 @@ function Get-DefenderXDRIncident {
         # Validate permissions
         Test-DefenderXDRPermission -RequiredPermissions @('SecurityIncident.Read.All', 'SecurityIncident.ReadWrite.All') -FunctionName $MyInvocation.MyCommand.Name
 
-        if (-not($hasPermission)) { break }
+        if (-not $script:hasPermission) {
+            Write-Verbose "Permission check failed for incidents. Aborting request."
+            return
+        }
         
         if ($PSCmdlet.ParameterSetName -eq 'ById') {
-            $uri = "$script:GraphBaseUri/$script:GraphAPIVersion/security/incidents/$IncidentId"
+            $uri = "$script:GraphBaseUri/$script:GraphAPIBetaVersion/security/incidents/$IncidentId"
         }
         else {
-            $uri = "$script:GraphBaseUri/$script:GraphAPIVersion/security/incidents"
+            $uri = "$script:GraphBaseUri/$script:GraphAPIBetaVersion/security/incidents"
             
             $queryParams = @()
             if ($Filter) { $queryParams += "`$filter=$Filter" }

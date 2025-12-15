@@ -31,12 +31,13 @@ Export-ModuleMember -Alias 'Submit-DefenderXDRThreatIndicator'
 
 # Module variables
 $script:ModuleVersion = '1.0.0'
-$script:GraphAPIVersion = 'v1.0'
+$script:GraphAPIVersion = 'beta'
 $script:GraphAPIBetaVersion = 'beta'
 $script:GraphBaseUri = 'https://graph.microsoft.com'
 $script:AccessToken = $null
 $script:TokenExpiration = $null
 $script:TenantId = $null
 $script:hasPermission = $false
+$script:ConnectionReminderDisplayed = $false
 
 Write-Verbose "DefenderXDR module loaded successfully"

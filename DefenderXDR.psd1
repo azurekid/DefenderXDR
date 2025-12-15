@@ -99,7 +99,16 @@
         'Get-DefenderXDRSecureScoreControlProfile',
         
         # Advanced Hunting
-        'Invoke-DefenderXDRAdvancedHuntingQuery'
+        'Invoke-DefenderXDRAdvancedHuntingQuery',
+
+        # Custom Detections
+        'New-DefenderXDRCustomDetection',
+        'Get-DefenderXDRCustomDetection',
+        'Update-DefenderXDRCustomDetection',
+        'Remove-DefenderXDRCustomDetection',
+
+        # Utilities
+        'Get-DefenderXDRTokenInfo'
     )
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
