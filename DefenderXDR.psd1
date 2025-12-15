@@ -24,7 +24,7 @@
     Description = 'PowerShell module for managing Microsoft Defender XDR (Extended Detection and Response) configurations through Microsoft Graph API'
 
     # Minimum version of the PowerShell engine required by this module
-    PowerShellVersion = '5.1'
+    PowerShellVersion = '7'
 
     # Name of the PowerShell host required by this module
     # PowerShellHostName = ''
