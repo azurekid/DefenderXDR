@@ -67,6 +67,7 @@ function Test-DefenderXDRPermission {
         if ($tokenPermissions.Count -eq 0) {
             Write-Warning "No permissions found in access token for $FunctionName. The token may not have the required scopes."
             Write-Warning "Required permissions: $($RequiredPermissions -join ', ')"
+            $script:hasPermission = $true
             return $true  # Allow the request to proceed, API will reject if permissions are insufficient
         }
 
@@ -112,7 +113,8 @@ function Test-DefenderXDRPermission {
             throw
         }
         # Otherwise, it's an error in the validation process itself, allow the request to proceed
-        Write-Warning "Unable to validate permissions for $FunctionName`: $_"
+        $script:hasPermission = $true
+        return $true  # Allow the request to proceed if we can't validate
         return  # Allow the request to proceed if we can't validate
     }
 }

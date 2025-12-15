@@ -24,7 +24,7 @@
     Description = 'PowerShell module for managing Microsoft Defender XDR (Extended Detection and Response) configurations through Microsoft Graph API'
 
     # Minimum version of the PowerShell engine required by this module
-    PowerShellVersion = '7'
+    PowerShellVersion = '5.1'
 
     # Name of the PowerShell host required by this module
     # PowerShellHostName = ''
@@ -65,39 +65,39 @@
         'Connect-DefenderXDR',
         'Disconnect-DefenderXDR',
         'Get-DefenderXDRAccessToken',
-        
+
         # Security Alerts
         'Get-DefenderXDRAlert',
         'Update-DefenderXDRAlert',
         'New-DefenderXDRAlertComment',
-        
+
         # Incidents
         'Get-DefenderXDRIncident',
         'Update-DefenderXDRIncident',
         'New-DefenderXDRIncidentComment',
-        
+
         # Detection Rules
         'Get-DefenderXDRDetectionRule',
         'New-DefenderXDRDetectionRule',
         'Update-DefenderXDRDetectionRule',
         'Remove-DefenderXDRDetectionRule',
-        
+
         # Threat Intelligence (Graph API)
         'Get-DefenderXDRThreatIntelligence',
         'Set-DefenderXDRThreatIndicator',
         'Remove-DefenderXDRThreatIndicator',
-        
+
         # Threat Intelligence (Defender Endpoint API)
         'Get-DefenderXDRIndicator',
         'Submit-DefenderXDRIndicator',
         'Import-DefenderXDRIndicators',
         'Remove-DefenderXDRIndicator',
         'Remove-DefenderXDRIndicatorBatch',
-        
+
         # Security Configuration
         'Get-DefenderXDRSecureScore',
         'Get-DefenderXDRSecureScoreControlProfile',
-        
+
         # Advanced Hunting
         'Invoke-DefenderXDRAdvancedHuntingQuery',
 
