@@ -40,6 +40,12 @@ This module provides a comprehensive set of cmdlets to interact with Microsoft D
 - **Advanced Hunting**
   - Execute KQL queries against Defender XDR data
 
+- **Object-Oriented Classes** (PowerShell 7.0+)
+  - Typed objects for Alerts, Incidents, and Indicators
+  - Built-in validation and methods
+  - Enhanced IntelliSense support
+  - Factory functions for object creation
+
 ## Installation
 
 ### From Local Path
@@ -61,7 +67,7 @@ Get-Command -Module DefenderXDR
 
 ## Prerequisites
 
-- PowerShell 5.1 or PowerShell 7+
+- PowerShell Core 7.0 or higher
 - Azure AD Application with appropriate permissions:
   - `SecurityEvents.Read.All` - Read security events
   - `SecurityEvents.ReadWrite.All` - Read and write security events
@@ -289,6 +295,118 @@ $results | Export-Csv -Path "hunting_results.csv" -NoTypeInformation
 # Disconnect and clear stored credentials
 Disconnect-DefenderXDR
 ```
+
+## Using Classes (PowerShell 5.1+)
+
+This module includes PowerShell classes for enhanced type safety, validation, and object-oriented programming. Classes provide:
+
+- **Type Safety**: Strongly-typed objects with validation
+- **Methods**: Built-in methods for common operations
+- **IntelliSense**: Better IDE support and auto-completion
+- **Validation**: Automatic validation of properties and parameters
+
+### Available Classes
+
+- **`DefenderEntity`**: Base class for all Defender objects
+- **`DefenderAlert`**: Alert objects with status update methods
+- **`DefenderIncident`**: Incident objects with assignment and status methods
+- **`DefenderIndicator`**: Threat indicator objects with validation
+- **`DefenderQueryResult`**: Advanced hunting results with processing methods
+- **`DefenderXDRClient`**: API client for managing connections
+- **`DefenderValidator`**: Static validation methods
+
+### Creating Objects with Classes
+
+```powershell
+# Create a new alert object
+$alert = New-DefenderAlert -AlertId "da123..." -Title "Suspicious Login" -Severity "High"
+
+# Update alert status using methods
+$alert.UpdateStatus("inProgress")
+$alert.AddComment("Investigating suspicious login pattern")
+$alert.SetClassification("truePositive")
+
+# Create an incident
+$incident = New-DefenderIncident -IncidentId "ic456..." -Title "Brute Force Attack" -Severity "High"
+$incident.AssignTo("security-team@contoso.com")
+$incident.UpdateStatus("active")
+
+# Create a threat indicator with validation
+$indicator = New-DefenderIndicator -IndicatorValue "192.168.1.100" `
+                                   -IndicatorType "IpAddress" `
+                                   -Action "Block" `
+                                   -Title "Malicious IP Address"
+$indicator.SetExpiration((Get-Date).AddDays(30))
+```
+
+### Converting API Responses to Class Objects
+
+```powershell
+# Get alerts and convert to typed objects
+$apiAlerts = Get-DefenderXDRAlert -Top 10
+$typedAlerts = $apiAlerts | ConvertTo-DefenderAlert
+
+# Work with typed objects
+foreach ($alert in $typedAlerts) {
+    if ($alert.Severity -eq 'High') {
+        $alert.UpdateStatus('inProgress')
+        # Additional processing...
+    }
+}
+
+# Convert incidents
+$apiIncidents = Get-DefenderXDRIncident -Top 5
+$typedIncidents = $apiIncidents | ConvertTo-DefenderIncident
+```
+
+### Using the Defender Client Class
+
+```powershell
+# Create a client instance (future enhancement)
+$client = [DefenderXDRClient]::new()
+$client.Connect("client-secret-here")
+
+# Get typed objects directly
+$alerts = $client.GetAlerts("severity eq 'high'", 20)
+$incidents = $client.GetIncidents("", 10)
+
+# Run hunting queries with result processing
+$queryResult = $client.RunHuntingQuery("DeviceProcessEvents | limit 100")
+$highCpuProcesses = $queryResult.Where({ $_.CpuUsage -gt 80 })
+$queryResult.ExportToCsv("high_cpu_processes.csv")
+```
+
+### Validation with Classes
+
+```powershell
+# Static validation methods
+[DefenderValidator]::ValidateAlertStatus("inProgress")  # Valid
+[DefenderValidator]::ValidateAlertStatus("invalid")     # Throws exception
+
+[DefenderValidator]::ValidateIpAddress("192.168.1.1")   # Valid
+[DefenderValidator]::ValidateIpAddress("999.999.999.999") # Throws exception
+
+[DefenderValidator]::ValidateEmail("user@contoso.com")  # Valid
+[DefenderValidator]::ValidateEmail("invalid-email")     # Throws exception
+```
+
+### Benefits of Using Classes
+
+1. **Type Safety**: Catch errors at development time rather than runtime
+2. **IntelliSense**: Better IDE support with property and method completion
+3. **Validation**: Automatic validation prevents invalid data
+4. **Methods**: Rich functionality built into objects
+5. **Maintainability**: Object-oriented design is easier to extend and maintain
+6. **Testing**: Easier to mock and test with typed objects
+
+### Compatibility
+
+Classes are supported in:
+- PowerShell 5.1 (Windows PowerShell)
+- PowerShell 7+ (PowerShell Core)
+- All supported platforms (Windows, Linux, macOS)
+
+The module automatically loads classes when available. If you're using an older PowerShell version that doesn't support classes, the module will still work with traditional functions.
 
 ## Common Workflows
 

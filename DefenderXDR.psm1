@@ -23,8 +23,12 @@ foreach ($import in @($Classes + $Private + $Public)) {
     }
 }
 
-# Export public functions
-Export-ModuleMember -Function $Public.BaseName
+# Export public functions (from Public and Classes directories)
+$AllPublic = @($Public + $Classes)
+Export-ModuleMember -Function $AllPublic.BaseName
+
+# Also export specific class factory functions
+Export-ModuleMember -Function 'New-DefenderAlert', 'New-DefenderIncident', 'New-DefenderIndicator', 'ConvertTo-DefenderAlert', 'ConvertTo-DefenderIncident'
 
 # Export aliases
 Export-ModuleMember -Alias 'Submit-DefenderXDRThreatIndicator'

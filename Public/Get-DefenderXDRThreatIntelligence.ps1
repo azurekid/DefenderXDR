@@ -56,7 +56,7 @@ function Get-DefenderXDRThreatIntelligence {
 
         $response = Invoke-DefenderXDRRequest -Uri $uri -Method GET
         
-        if ($PSCmdlet.ParameterSetName -eq 'ById') {
+        if ($IndicatorId) {
             return $response
         }
         else {

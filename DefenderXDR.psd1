@@ -6,7 +6,7 @@
     ModuleVersion = '1.0.0'
 
     # Supported PSEditions
-    CompatiblePSEditions = @('Desktop', 'Core')
+    CompatiblePSEditions = @('Core')
 
     # ID used to uniquely identify this module
     GUID = '8a3c7b9e-4d5f-4a8b-9c2e-1f3d4e5a6b7c'
@@ -24,7 +24,7 @@
     Description = 'PowerShell module for managing Microsoft Defender XDR (Extended Detection and Response) configurations through Microsoft Graph API'
 
     # Minimum version of the PowerShell engine required by this module
-    PowerShellVersion = '7'
+    PowerShellVersion = '7.0'
 
     # Name of the PowerShell host required by this module
     # PowerShellHostName = ''
@@ -108,7 +108,14 @@
         'Remove-DefenderXDRCustomDetection',
 
         # Utilities
-        'Get-DefenderXDRTokenInfo'
+        'Get-DefenderXDRTokenInfo',
+
+        # Class Factory Functions
+        'New-DefenderAlert',
+        'New-DefenderIncident',
+        'New-DefenderIndicator',
+        'ConvertTo-DefenderAlert',
+        'ConvertTo-DefenderIncident'
     )
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.

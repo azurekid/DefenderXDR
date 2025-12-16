@@ -5,8 +5,7 @@ This guide will help you install and configure the DefenderXDR PowerShell module
 ## Prerequisites
 
 ### PowerShell Version
-- PowerShell 5.1 or later
-- PowerShell 7.x (recommended)
+- PowerShell Core 7.0 or higher
 
 To check your PowerShell version:
 ```powershell

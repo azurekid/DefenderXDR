@@ -47,6 +47,14 @@ function Import-DefenderXDRIndicators {
         # Validate permissions
         Test-DefenderXDRPermission -RequiredPermissions @('Ti.ReadWrite') -FunctionName $MyInvocation.MyCommand.Name
         
+        if ($PSCmdlet.ParameterSetName -eq 'Objects' -and -not $Indicators) {
+            throw "Indicators parameter is required."
+        }
+        
+        if ($PSCmdlet.ParameterSetName -eq 'Json' -and -not $IndicatorsJson) {
+            throw "IndicatorsJson parameter is required."
+        }
+        
         $baseUri = "https://api.securitycenter.microsoft.com/api"
         $uri = "$baseUri/indicators/import"
 
@@ -64,12 +72,10 @@ function Import-DefenderXDRIndicators {
             }
         }
 
-        if ($PSCmdlet.ShouldProcess("$($body.Indicators.Count) indicators", "Import to Defender Endpoint")) {
-            Write-Verbose "Importing $($body.Indicators.Count) indicators"
-            $response = Invoke-DefenderXDRRequest -Uri $uri -Method POST -Body $body
-            Write-Verbose "Import completed successfully"
-            return $response
-        }
+        Write-Verbose "Importing $($body.Indicators.Count) indicators"
+        $response = Invoke-DefenderXDRRequest -Uri $uri -Method POST -Body $body
+        Write-Verbose "Import completed successfully"
+        return $response
     }
     catch {
         Write-Error "Failed to import threat indicators: $_"
