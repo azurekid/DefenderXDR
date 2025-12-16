@@ -108,14 +108,7 @@
         'Remove-DefenderXDRCustomDetection',
 
         # Utilities
-        'Get-DefenderXDRTokenInfo',
-
-        # Class Factory Functions
-        'New-DefenderAlert',
-        'New-DefenderIncident',
-        'New-DefenderIndicator',
-        'ConvertTo-DefenderAlert',
-        'ConvertTo-DefenderIncident'
+        'Get-DefenderXDRTokenInfo'
     )
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
