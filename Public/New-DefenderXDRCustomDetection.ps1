@@ -17,6 +17,10 @@ function New-DefenderXDRCustomDetection {
         Logical category or classification for the detection. Optional.
     .PARAMETER RecommendedActions
         Recommended remediation or triage actions. Optional.
+    .PARAMETER MitreTechniques
+        Array of MITRE ATT&CK technique IDs (e.g., @('T1114.003', 'T1048')). Optional.
+    .PARAMETER ImpactedAssets
+        Array of impacted asset identifiers. Optional.
     .PARAMETER Enabled
         Whether the rule is enabled immediately. Defaults to $true.
     .PARAMETER FrequencyMinutes
@@ -26,7 +30,7 @@ function New-DefenderXDRCustomDetection {
     .PARAMETER EndpointUri
         Optional full endpoint URI to POST to. Overrides built-in candidates. Useful if your tenant/region uses a different path.
     .EXAMPLE
-        New-DefenderXDRCustomDetection -DisplayName "Suspicious PowerShell Download" -Description "Detects PowerShell downloading remote content" -Query "DeviceProcessEvents | where FileName == 'powershell.exe' and ProcessCommandLine contains 'Invoke-WebRequest'" -Severity High -Category "Execution" -RecommendedActions "Review process ancestry; isolate device if malicious"
+        New-DefenderXDRCustomDetection -DisplayName "Suspicious PowerShell Download" -Description "Detects PowerShell downloading remote content" -Query "DeviceProcessEvents | where FileName == 'powershell.exe' and ProcessCommandLine contains 'Invoke-WebRequest'" -Severity High -Category "Execution" -RecommendedActions "Review process ancestry; isolate device if malicious" -MitreTechniques @('T1059.001', 'T1105')
     .EXAMPLE
         New-DefenderXDRCustomDetection -DisplayName "Outbound to Rare Domain" -Description "Detects rare outbound DNS queries" -Query "DeviceNetworkEvents | summarize dcount(DeviceName) by RemoteUrl | where dcount_DeviceName < 3" -Severity Medium -FrequencyMinutes 30
     #>
@@ -50,6 +54,12 @@ function New-DefenderXDRCustomDetection {
 
         [Parameter(Mandatory = $false)]
         [string]$RecommendedActions,
+
+        [Parameter(Mandatory = $false)]
+        [string[]]$MitreTechniques,
+
+        [Parameter(Mandatory = $false)]
+        [string[]]$ImpactedAssets,
 
         [Parameter(Mandatory = $false)]
         [bool]$Enabled = $true,
@@ -105,6 +115,17 @@ function New-DefenderXDRCustomDetection {
         }
         if ($RecommendedActions) {
             $alertTemplate.recommendedActions = $RecommendedActions
+        }
+        if ($MitreTechniques -and $MitreTechniques.Count -gt 0) {
+            $alertTemplate.mitreTechniques = $MitreTechniques
+        }
+        if ($ImpactedAssets -and $ImpactedAssets.Count -gt 0) {
+            $alertTemplate.impactedAssets = @($ImpactedAssets | ForEach-Object {
+                @{
+                    '@odata.type' = '#microsoft.graph.security.impactedUserAsset'
+                    identifier = $_
+                }
+            })
         }
 
         $body.detectionAction = @{

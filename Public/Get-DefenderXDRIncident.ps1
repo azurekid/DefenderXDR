@@ -30,7 +30,7 @@ function Get-DefenderXDRIncident {
         [string]$Filter,
 
         [Parameter(Mandatory = $false, ParameterSetName = 'List')]
-        [int]$Top = 100,
+        [int]$Top = 50,
 
         [Parameter(Mandatory = $false, ParameterSetName = 'List')]
         [int]$Skip,
