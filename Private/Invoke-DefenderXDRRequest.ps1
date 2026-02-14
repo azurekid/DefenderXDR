@@ -60,9 +60,11 @@ function Invoke-DefenderXDRRequest {
 
     if ($Body) {
         if ($Body -is [string]) {
+            Write-Verbose "Using string body for request"
             $params['Body'] = $Body
         }
         else {
+            Write-Verbose "Converting body object to JSON for request"
             $params['Body'] = $Body | ConvertTo-Json -Depth 10
         }
     }
