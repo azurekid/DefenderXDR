@@ -69,18 +69,20 @@ function Invoke-DefenderXDRRequest {
 
     try {
         # Warn if token audience likely mismatches target host
-        try {
-            $uri = [System.Uri]$Uri
-            $targetHost = $uri.Host.ToLowerInvariant()
-            if ($script:ApiAudience -eq 'Security' -and $targetHost -like '*graph.microsoft.com') {
-                Write-Warning "Token audience is Security but target is Graph ($targetHost). Consider connecting with -Audience Graph."
+        if ($script:ApiAudience) {
+            try {
+                $parsedUri = [System.Uri]$Uri
+                $targetHost = $parsedUri.Host.ToLowerInvariant()
+                if ($script:ApiAudience -eq 'Security' -and $targetHost -like '*graph.microsoft.com') {
+                    Write-Warning "Token audience is Security but target is Graph ($targetHost). Consider connecting with -Audience Graph."
+                }
+                elseif ($script:ApiAudience -eq 'Graph' -and ($targetHost -like '*api.security.microsoft.com' -or $targetHost -like '*api.securitycenter.microsoft.com')) {
+                    Write-Warning "Token audience is Graph but target is Defender Security API ($targetHost). Consider connecting with -Audience Security."
+                }
             }
-            elseif ($script:ApiAudience -eq 'Graph' -and ($targetHost -like '*api.security.microsoft.com' -or $targetHost -like '*api.securitycenter.microsoft.com')) {
-                Write-Warning "Token audience is Graph but target is Defender Security API ($targetHost). Consider connecting with -Audience Security."
+            catch {
+                Write-Verbose "Unable to inspect host for audience warning: $($_.Exception.Message)"
             }
-        }
-        catch {
-            Write-Verbose "Unable to inspect host for audience warning: $($_.Exception.Message)"
         }
 
         Write-Verbose "Making $Method request to: $Uri"
