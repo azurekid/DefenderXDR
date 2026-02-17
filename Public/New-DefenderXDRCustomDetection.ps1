@@ -81,7 +81,7 @@ function New-DefenderXDRCustomDetection {
         [string[]]$MitreTechniques,
 
         [Parameter(Mandatory = $false)]
-        [string[]]$ImpactedAssets,
+        [object[]]$ImpactedAssets,
 
         [Parameter(Mandatory = $false)]
         [bool]$Enabled = $true,
@@ -154,9 +154,17 @@ function New-DefenderXDRCustomDetection {
         # impactedAssets — auto-detect from query table name when not specified
         if ($ImpactedAssets -and $ImpactedAssets.Count -gt 0) {
             $alertTemplate['impactedAssets'] = @($ImpactedAssets | ForEach-Object {
-                [ordered]@{
-                    '@odata.type' = '#microsoft.graph.security.impactedDeviceAsset'
-                    identifier    = $_
+                if (($_ -is [hashtable] -and $_.ContainsKey('@odata.type')) -or ($_ -is [PSCustomObject] -and $_.PSObject.Properties.Name -contains '@odata.type')) {
+                    $_
+                }
+                else {
+                    # Guess type if only identifier string or object without type provided
+                    $id = if ($_ -is [hashtable] -or $_ -is [PSCustomObject]) { $_.identifier } else { $_ }
+                    $type = if ($id -match 'Account|User|Upn|Email|Sid') { '#microsoft.graph.security.impactedUserAsset' } else { '#microsoft.graph.security.impactedDeviceAsset' }
+                    [ordered]@{
+                        '@odata.type' = $type
+                        identifier    = $id
+                    }
                 }
             })
         } elseif ($Query -match 'Device\w+Events|DeviceInfo|DeviceNetworkInfo') {
